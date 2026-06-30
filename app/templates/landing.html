@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col bg-[var(--background)]">
+
+
+    <!-- Hero Section -->
+    <main class="flex-grow flex flex-col items-center justify-center relative px-4 overflow-hidden">
+        <!-- Subtle Dot Pattern Background -->
+        <div class="absolute inset-0 z-0 opacity-20"
+            style="background: radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px); background-size: 32px 32px;">
+        </div>
+
+        <!-- Ambient Glows -->
+        <div
+            class="absolute top-[10%] left-[20%] w-[500px] h-[500px] rounded-full bg-blue-500/20 blur-[120px] z-0 pointer-events-none">
+        </div>
+        <div
+            class="absolute bottom-[10%] right-[20%] w-[500px] h-[500px] rounded-full bg-indigo-500/20 blur-[120px] z-0 pointer-events-none">
+        </div>
+
+        <div
+            class="z-10 text-center relative w-full max-w-4xl mx-auto flex flex-col items-center animate-fade-in-up mt-10 sm:mt-0">
+            <!-- Glowing Logo Container -->
+            <div
+                class="inline-flex items-center justify-center w-32 h-32 sm:w-48 sm:h-48 rounded-full sm:rounded-[3rem] bg-blue-500/10 backdrop-blur-xl shadow-[0_0_50px_rgba(59,130,246,0.5)] mb-8 border border-blue-400/30 p-4 sm:p-6 relative group hover:shadow-[0_0_80px_rgba(59,130,246,0.7)] transition-shadow duration-500">
+                <img src="{{ url_for('static', filename='image/logo_bluemarlins.png') }}" alt="DBMST Logo"
+                    class="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] group-hover:scale-105 transition-transform duration-500">
+            </div>
+
+            <div class="section-badge mb-6">
+                <span class="section-badge-dot"></span>
+                <span class="section-badge-text">Welcome to DBMST</span>
+            </div>
+
+            <h1 class="text-5xl sm:text-7xl font-serif text-white mb-6 tracking-tight leading-[1.1] drop-shadow-lg">
+                Davnor <span class="gradient-text">Blue Marlins</span><br>Swim Team
+            </h1>
+
+
+            <div class="flex items-center justify-center w-full sm:w-auto">
+                <a href="{{ url_for('auth.login') }}" class="btn-primary w-full sm:w-auto text-lg px-8 py-3">
+                    Access Dashboard
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="absolute bottom-6 w-full text-center z-10">
+        <p class="text-[var(--muted-foreground)] text-sm">
+            &copy;Davnor Blue Marlins Swim Team. All rights reserved.
+        </p>
+    </footer>
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "dashboard_layout.html" %}
+
+{% block content %}
+<div class="space-y-8 animate-fade-in-up">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="section-badge mb-4">
+                <span class="section-badge-dot"></span>
+                <span class="section-badge-text">Events</span>
+            </div>
+            <h1 class="text-4xl font-serif text-[var(--foreground)] tracking-tight">Competitions & Results</h1>
+        </div>
+        {% if session.get('role') in ['HeadCoach', 'AsstCoach', 'System Administrator'] %}
+        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
+            <button onclick="document.getElementById('manual-entry-modal').style.display='flex'" class="btn-secondary w-full sm:w-auto text-center justify-center">
+                + Manual Entry
+            </button>
+            <button onclick="document.getElementById('upload-excel-modal').style.display='flex'" class="btn-success w-full sm:w-auto text-center justify-center">
+                📤 Bulk Upload
+            </button>
+            <a href="{{ url_for('competitions.download_template') }}" hx-boost="false" download class="btn-secondary w-full sm:w-auto text-center justify-center">
+                📥 Template
+            </a>
+            <a href="{{ url_for('competitions.add') }}" class="btn-primary w-full sm:w-auto text-center justify-center">
+                + Competition
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="modern-card overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="min-w-full divide-y divide-[var(--border)]">
+                <thead class="bg-[var(--muted)]/50">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Venue</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Date</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Pool Type</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--border)] bg-[var(--card)]">
+                    {% for comp in competitions %}
+                    <tr class="hover:bg-[#252525] transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)]">{{ comp.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ comp.venue }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ comp.date }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ comp.pool_type }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-sm text-[var(--muted-foreground)]">No competitions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Excel Modal -->
+<div id="upload-excel-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding: 20px;">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+        <span onclick="document.getElementById('upload-excel-modal').style.display='none'" class="absolute top-4 right-4 cursor-pointer text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-2xl">&times;</span>
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--muted)] text-3xl mb-4">
+                📤
+            </div>
+            <h2 class="text-2xl font-serif mt-2 text-[var(--foreground)]">Upload Race Results</h2>
+            <p class="text-sm text-[var(--muted-foreground)] mt-2">Only .xls and .xlsx files are supported.</p>
+        </div>
+        
+        <form action="{{ url_for('competitions.upload_excel') }}" method="POST" enctype="multipart/form-data" onsubmit="
+            document.getElementById('upload-btn-text').classList.add('hidden');
+            document.getElementById('upload-spinner').classList.remove('hidden');
+            document.getElementById('upload-btn').disabled = true;
+            document.getElementById('upload-btn').classList.add('opacity-70', 'cursor-not-allowed');
+            document.getElementById('cancel-btn').disabled = true;
+        ">
+            <div class="mb-6">
+                <input type="file" name="file" accept=".xls,.xlsx" class="input-modern cursor-pointer p-2 flex items-center" required>
+            </div>
+            
+            <div class="flex space-x-4 mt-8">
+                <button type="button" id="cancel-btn" onclick="document.getElementById('upload-excel-modal').style.display='none'" class="flex-1 btn-secondary disabled:opacity-50">Cancel</button>
+                <button type="submit" id="upload-btn" class="flex-1 btn-success relative flex items-center justify-center">
+                    <span id="upload-btn-text">Upload & Import</span>
+                    <span id="upload-spinner" class="hidden flex items-center justify-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Manual Entry Modal -->
+<div id="manual-entry-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding: 20px;">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
+        <span onclick="document.getElementById('manual-entry-modal').style.display='none'" class="absolute top-4 right-4 cursor-pointer text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-2xl">&times;</span>
+        <div class="mb-6">
+            <h2 class="text-2xl font-serif text-[var(--foreground)]">Add Manual Race Result</h2>
+        </div>
+        <form action="{{ url_for('competitions.manual_entry') }}" method="POST">
+            <div class="space-y-5">
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-medium text-[var(--foreground)]">Swimmer Name</label>
+                    <input type="text" name="swimmer_name" required class="input-modern">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-medium text-[var(--foreground)]">Competition Name</label>
+                    <input type="text" name="comp_name" required class="input-modern">
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-[var(--foreground)]">Distance (m)</label>
+                        <input type="number" name="distance" required class="input-modern">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-[var(--foreground)]">Stroke</label>
+                        <select name="stroke" class="input-modern bg-[var(--card)]">
+                            <option>Freestyle</option>
+                            <option>Backstroke</option>
+                            <option>Breaststroke</option>
+                            <option>Butterfly</option>
+                            <option>IM</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-medium text-[var(--foreground)]">Time (mm:ss.SS)</label>
+                    <input type="text" name="time" placeholder="01:25.50" required class="input-modern">
+                </div>
+            </div>
+            
+            <div class="flex space-x-4 mt-8">
+                <button type="button" onclick="document.getElementById('manual-entry-modal').style.display='none'" class="flex-1 btn-secondary">Cancel</button>
+                <button type="submit" class="flex-1 btn-primary">Save Result</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

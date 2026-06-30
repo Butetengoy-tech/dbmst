@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block layout %}
+<!-- Main App Container -->
+<div class="flex h-screen overflow-hidden bg-[var(--background)]">
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="transition-opacity ease-linear duration-300" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0" 
+         class="fixed inset-0 bg-[var(--background)]/80 z-40 md:hidden backdrop-blur-sm" 
+         @click="sidebarOpen = false" 
+         style="display: none;">
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="fixed inset-y-0 left-0 z-50 bg-[var(--card)] flex flex-col transition-all duration-300 ease-in-out md:static md:translate-x-0 border-r border-[var(--border)] shrink-0"
+           :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen, 'w-20': desktopCollapsed, 'w-72': !desktopCollapsed}">
+        
+        <!-- Brand Header -->
+        <div class="flex items-center justify-between py-8 transition-all duration-300" :class="{'px-4 justify-center': desktopCollapsed, 'px-6': !desktopCollapsed}">
+            <div class="flex items-center gap-3">
+                <button @click="desktopCollapsed = !desktopCollapsed" class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 shadow-lg p-1 border border-white/20 shrink-0 hover:bg-white/20 transition-colors focus:outline-none" title="Toggle Sidebar">
+                    <img src="{{ url_for('static', filename='image/logo_bluemarlins.png') }}" alt="DBMST Logo" class="w-full h-full object-contain">
+                </button>
+                <h1 x-show="!desktopCollapsed" class="text-2xl font-serif tracking-tight text-white transition-opacity duration-300 whitespace-nowrap">DBMST</h1>
+            </div>
+            <!-- Mobile Close Button -->
+            <button @click="sidebarOpen = false" class="md:hidden text-slate-400 hover:text-white transition-colors" x-show="!desktopCollapsed">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 px-4 space-y-2 overflow-y-auto mt-2 custom-scrollbar">
+            <a href="{{ url_for('dashboard.index') }}" 
+               class="flex items-center py-3.5 text-sm font-medium rounded-xl transition-all duration-200 group {% if request.endpoint == 'dashboard.index' %}bg-[var(--accent)] text-[var(--background)] shadow-md{% else %}text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]{% endif %}"
+               :class="{'px-0 justify-center': desktopCollapsed, 'px-4': !desktopCollapsed}"
+               title="Dashboard">
+                <svg class="w-5 h-5 shrink-0 {% if request.endpoint != 'dashboard.index' %}text-[var(--muted-foreground)] group-hover:text-[var(--accent)]{% endif %} transition-colors" :class="{'mr-0': desktopCollapsed, 'mr-3': !desktopCollapsed}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span x-show="!desktopCollapsed" class="whitespace-nowrap transition-opacity duration-300">Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('swimmers.index') }}" 
+               class="flex items-center py-3.5 text-sm font-medium rounded-xl transition-all duration-200 group {% if 'swimmers' in request.endpoint %}bg-[var(--accent)] text-[var(--background)] shadow-md{% else %}text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]{% endif %}"
+               :class="{'px-0 justify-center': desktopCollapsed, 'px-4': !desktopCollapsed}"
+               title="Swimmers">
+                <svg class="w-5 h-5 shrink-0 {% if 'swimmers' not in request.endpoint %}text-[var(--muted-foreground)] group-hover:text-[var(--accent)]{% endif %} transition-colors" :class="{'mr-0': desktopCollapsed, 'mr-3': !desktopCollapsed}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span x-show="!desktopCollapsed" class="whitespace-nowrap transition-opacity duration-300">Swimmers</span>
+            </a>
+
+            <a href="{{ url_for('competitions.index') }}" 
+               class="flex items-center py-3.5 text-sm font-medium rounded-xl transition-all duration-200 group {% if 'competitions' in request.endpoint %}bg-[var(--accent)] text-[var(--background)] shadow-md{% else %}text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]{% endif %}"
+               :class="{'px-0 justify-center': desktopCollapsed, 'px-4': !desktopCollapsed}"
+               title="Competitions">
+                <svg class="w-5 h-5 shrink-0 {% if 'competitions' not in request.endpoint %}text-[var(--muted-foreground)] group-hover:text-[var(--accent)]{% endif %} transition-colors" :class="{'mr-0': desktopCollapsed, 'mr-3': !desktopCollapsed}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <span x-show="!desktopCollapsed" class="whitespace-nowrap transition-opacity duration-300">Competitions</span>
+            </a>
+
+            {% if session.get('role') == 'System Administrator' %}
+            <div class="pt-6 pb-2 text-center" :class="{'text-left': !desktopCollapsed}">
+                <p x-show="!desktopCollapsed" class="px-4 text-xs font-semibold tracking-wider text-[var(--muted-foreground)] uppercase whitespace-nowrap">Administration</p>
+                <p x-show="desktopCollapsed" class="text-[10px] font-semibold tracking-wider text-[var(--muted-foreground)] uppercase">Admin</p>
+            </div>
+            <a href="{{ url_for('admin.staff') }}" 
+               class="flex items-center py-3.5 text-sm font-medium rounded-xl transition-all duration-200 group {% if 'admin' in request.endpoint %}bg-[var(--accent)] text-[var(--background)] shadow-md{% else %}text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]{% endif %}"
+               :class="{'px-0 justify-center': desktopCollapsed, 'px-4': !desktopCollapsed}"
+               title="Staff Management">
+                <svg class="w-5 h-5 shrink-0 {% if 'admin' not in request.endpoint %}text-[var(--muted-foreground)] group-hover:text-[var(--accent)]{% endif %} transition-colors" :class="{'mr-0': desktopCollapsed, 'mr-3': !desktopCollapsed}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <span x-show="!desktopCollapsed" class="whitespace-nowrap transition-opacity duration-300">Staff Management</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <!-- Bottom User Profile Area -->
+        <div class="p-4 mt-auto">
+            <div class="bg-[var(--background)] border border-[var(--border)] rounded-2xl flex flex-col gap-4 transition-all duration-300" :class="{'p-2': desktopCollapsed, 'p-4': !desktopCollapsed}">
+                <div class="flex items-center gap-3" :class="{'justify-center': desktopCollapsed}">
+                    <div class="w-10 h-10 rounded-full bg-[var(--muted)] border border-[var(--border)] flex items-center justify-center text-[var(--foreground)] font-medium shrink-0">
+                        {{ session.get('username', 'U')[:1] | upper }}
+                    </div>
+                    <div class="flex-1 min-w-0" x-show="!desktopCollapsed">
+                        <p class="text-sm font-medium text-[var(--foreground)] truncate">{{ session.get('username', 'User') }}</p>
+                        <p class="text-xs text-[var(--muted-foreground)] truncate">{{ session.get('role', 'Member') }}</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" 
+                   class="flex items-center justify-center w-full text-sm font-medium text-[var(--foreground)] bg-[var(--muted)] hover:bg-[var(--alert)] hover:text-[#FFFFFF] border border-[var(--border)] hover:border-transparent rounded-xl transition-all duration-200"
+                   :class="{'py-2 px-0': desktopCollapsed, 'py-2.5 px-4': !desktopCollapsed}"
+                   title="Sign Out">
+                    <svg class="w-4 h-4 shrink-0" :class="{'mr-0': desktopCollapsed, 'mr-2': !desktopCollapsed}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span x-show="!desktopCollapsed" class="whitespace-nowrap transition-opacity duration-300">Sign Out</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Content Area Wrapper -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[var(--background)] md:rounded-tl-[2rem] md:border-l md:border-t md:border-[var(--border)] relative">
+        
+        <!-- Mobile Header -->
+        <header class="md:hidden flex items-center justify-between px-4 h-16 border-b border-[var(--border)] bg-[var(--card)] z-10">
+            <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--card)] p-0.5 border border-[var(--border)]">
+                    <img src="{{ url_for('static', filename='image/logo_bluemarlins.png') }}" alt="DBMST Logo" class="w-full h-full object-contain">
+                </div>
+                <span class="font-serif text-lg tracking-tight text-[var(--foreground)]">DBMST</span>
+            </div>
+            <button @click="sidebarOpen = true" class="p-2 -mr-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </header>
+
+        <!-- Main Scrolling Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-4 md:p-8 lg:p-10 max-w-[1600px] mx-auto">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mb-6 space-y-4 animate-fade-in-up">
+                        {% for category, message in messages %}
+                            <div class="{{ 'watt-alert' if category == 'error' else 'p-4 rounded-xl text-sm border shadow-sm flex items-center justify-between bg-emerald-500/10 text-emerald-500 border-emerald-500/20' }}">
+                                <span>{{ message }}</span>
+                                <button onclick="this.parentElement.style.display='none'" class="text-current opacity-70 hover:opacity-100">&times;</button>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

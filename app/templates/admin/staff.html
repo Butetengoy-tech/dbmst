@@ -1,0 +1,50 @@
+{% extends "dashboard_layout.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="section-badge mb-4">
+                <span class="section-badge-dot"></span>
+                <span class="section-badge-text">Settings</span>
+            </div>
+            <h1 class="text-4xl font-serif text-[var(--foreground)] tracking-tight">Staff Management</h1>
+            <p class="mt-2 text-[var(--muted-foreground)]">Create credentials for Coaches.</p>
+        </div>
+    </div>
+
+
+
+    <div class="modern-card p-8 md:p-10 animate-fade-in-up">
+        <h2 class="text-2xl font-serif text-[var(--foreground)] mb-6">Register New Staff Member</h2>
+        <form method="POST" action="{{ url_for('admin.staff') }}" class="space-y-6 max-w-md">
+            <div class="space-y-2">
+                <label for="full_name" class="block text-sm font-medium text-[var(--foreground)]">Full Name</label>
+                <input type="text" id="full_name" name="full_name" required class="input-modern" placeholder="e.g. John Doe">
+            </div>
+
+            <div class="space-y-2">
+                <label for="email" class="block text-sm font-medium text-[var(--foreground)]">Staff Email</label>
+                <input type="email" id="email" name="email" required class="input-modern">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="password" class="block text-sm font-medium text-[var(--foreground)]">Initial Password</label>
+                <input type="password" id="password" name="password" required class="input-modern">
+            </div>
+
+            <div class="space-y-2">
+                <label for="role" class="block text-sm font-medium text-[var(--foreground)]">Staff Role</label>
+                <select id="role" name="role" required class="input-modern bg-[var(--card)]">
+                    <option value="HeadCoach">Head Coach</option>
+                    <option value="AsstCoach">Assistant Coach</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full btn-primary mt-6">
+                Create Staff Account
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

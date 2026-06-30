@@ -1,0 +1,764 @@
+{% extends "dashboard_layout.html" %}
+
+{% block content %}
+<div class="space-y-8 animate-fade-in-up pb-20">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="section-badge mb-4">
+                <span class="section-badge-dot"></span>
+                <span class="section-badge-text">Athlete Analytics</span>
+            </div>
+            <h1 class="text-4xl font-sans font-semibold text-[var(--foreground)] tracking-tight">{{ swimmer.full_name }}</h1>
+            <p class="text-sm text-[var(--muted-foreground)] mt-2">
+                {{ swimmer.gender }} • Born: {{ swimmer.birthday }}
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ url_for('swimmers.index') }}" class="btn-secondary">Back to Swimmers</a>
+        </div>
+    </div>
+
+    <!-- Floating Pill Navigation Bar -->
+    <div class="sticky top-6 z-50 mx-auto w-max max-w-full overflow-x-auto custom-scrollbar bg-[var(--card)]/90 backdrop-blur-md border border-[var(--border)] rounded-full shadow-lg p-1">
+        <nav class="flex space-x-1" aria-label="Tabs">
+            <button onclick="switchTab('tab-progress')" id="btn-progress" class="nav-pill active-pill px-4 py-2 text-sm font-medium rounded-full transition-all duration-300">
+                Monitor Progress
+            </button>
+            <button onclick="switchTab('tab-compare')" id="btn-compare" class="nav-pill text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-4 py-2 text-sm font-medium rounded-full transition-all duration-300">
+                Compare
+            </button>
+            <button onclick="switchTab('tab-detect')" id="btn-detect" class="nav-pill text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-4 py-2 text-sm font-medium rounded-full transition-all duration-300">
+                Detect Improvements
+            </button>
+            <button onclick="switchTab('tab-analyze')" id="btn-analyze" class="nav-pill text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-4 py-2 text-sm font-medium rounded-full transition-all duration-300">
+                Analyze Strengths
+            </button>
+        </nav>
+    </div>
+
+    <style>
+        .active-pill {
+            background-color: var(--accent);
+            color: #ffffff !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <!-- TAB 1: Monitor Swimmer Progress -->
+    <div id="tab-progress" class="tab-content active space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="modern-card p-6 border-l-4 border-emerald-500">
+                <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Total Races Tracked</h3>
+                <p class="mt-2 text-3xl font-mono font-bold text-[var(--foreground)]">{{ analytics_raw.total_races }}</p>
+            </div>
+            <div class="modern-card p-6 border-l-4 border-blue-500">
+                <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Primary Event</h3>
+                <p class="mt-2 text-3xl font-mono font-bold text-[var(--foreground)]">{{ analytics_raw.primary_stroke }}</p>
+            </div>
+            <div class="modern-card p-6 border-l-4 border-purple-500">
+                <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Unique Events</h3>
+                <p class="mt-2 text-3xl font-mono font-bold text-[var(--foreground)]">{{ analytics_raw.pbs | length }}</p>
+            </div>
+            <div class="modern-card p-6 border-l-4 border-amber-500">
+                <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Season Best (Mock)</h3>
+                <p class="mt-2 text-lg font-medium text-[var(--foreground)] text-amber-400">-1.2s avg drop</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Progress Timeline -->
+            <div class="modern-card p-6 lg:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-sans font-semibold text-[var(--foreground)]">Chronological Progress Timeline</h3>
+                    <select id="eventSelector" class="input-modern py-1 px-3 text-sm" onchange="updateTimeline()">
+                        {% for ename in analytics_raw.timeline.keys() %}
+                            <option value="{{ ename }}">{{ ename }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="w-full relative" style="height: 300px;">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Heatmap Placeholder -->
+            <div class="modern-card p-6 lg:col-span-1 flex flex-col justify-center items-center relative overflow-hidden">
+                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] w-full mb-4 absolute top-6 left-6">Progress Heatmap</h3>
+                <div class="mt-10 grid grid-cols-5 gap-1 w-full opacity-70">
+                    {% for i in range(25) %}
+                        <div class="h-8 rounded bg-emerald-{{ [300, 400, 500, 600, 700] | random }} transition-opacity hover:opacity-80 cursor-pointer" title="Mocked Heatmap Cell"></div>
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-[var(--muted-foreground)] mt-6 text-center">Performance density by Stroke vs Competition Month</p>
+            </div>
+        </div>
+
+        <!-- Raw Data Table -->
+        <div class="modern-card overflow-hidden mt-8">
+            <div class="p-6 border-b border-[var(--border)]">
+                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)]">Every Race Chronologically</h3>
+            </div>
+            <div class="overflow-x-auto custom-scrollbar max-h-96">
+                <table class="min-w-full divide-y divide-[var(--border)] relative">
+                    <thead class="bg-[var(--muted)]/50 sticky top-0 z-10 backdrop-blur-md">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Competition</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Event</th>
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Time</th>
+                            {% if session.get('role') in ('HeadCoach', 'System Administrator') %}
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--border)] bg-[var(--card)]">
+                        {% for result in results %}
+                        <tr class="hover:bg-[#252525] transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ result.comp_date }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)]">{{ result.comp_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ result.event_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-emerald-400">{{ result.time }}</td>
+                            {% if session.get('role') in ('HeadCoach', 'System Administrator') %}
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                <button onclick="openEditRaceModal('{{ result.id }}', '{{ result.comp_name | replace('\'', '\\\'') }}', '{{ result.events.stroke | replace('\'', '\\\'') }}', '{{ result.events.distance }}', '{{ result.events.category | replace('\'', '\\\'') }}', '{{ result.time }}')" class="text-[#00E5FF] hover:opacity-80 transition-opacity mr-3">Edit</button>
+                                <form action="{{ url_for('swimmers.delete_race', id=result.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this race result?');">
+                                    <button type="submit" class="text-red-400 hover:text-red-300 transition-colors">Delete</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-sm text-[var(--muted-foreground)]">No race history found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TAB 2: Compare Performances -->
+    <div id="tab-compare" class="tab-content space-y-6">
+        <div class="modern-card p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex-1">
+                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)]">Swimmer vs Swimmer Comparison</h3>
+                <p class="text-sm text-[var(--muted-foreground)] mt-1">Select another athlete from the database to compare metrics.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-lg font-bold text-[var(--accent)]">{{ swimmer.full_name }}</span>
+                <span class="text-[var(--muted-foreground)]">vs</span>
+                <select id="compareSwimmerSelect" class="input-modern w-64" onchange="updateComparison(this.value)">
+                    <option value="" disabled selected>Select opponent...</option>
+                    {% for s in all_swimmers %}
+                        {% if s.id != swimmer.id %}
+                            <option value="{{ s.id }}">{{ s.full_name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Side-by-Side Stats -->
+            <div class="modern-card p-6">
+                <div class="flex justify-between items-center mb-6 gap-2">
+                    <h3 class="text-lg font-sans font-semibold text-[var(--foreground)]">Side-by-Side Statistics</h3>
+                    <select id="compareEventSelect" class="input-modern text-sm py-1 px-2 w-auto" onchange="renderComparisonStats()">
+                        <option value="" disabled selected>Select event...</option>
+                        {% for ename in analytics_raw.pbs.keys() %}
+                            <option value="{{ ename }}">{{ ename }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <table class="w-full text-sm text-left">
+                    <thead class="text-[var(--muted-foreground)] border-b border-[var(--border)]">
+                        <tr>
+                            <th class="py-3 w-1/3">Metric</th>
+                            <th class="py-3 w-1/3">{{ swimmer.full_name }}</th>
+                            <th class="py-3 w-1/3" id="compareOpponentNameTh">Opponent</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--border)]" id="compareStatsBody">
+                        <tr>
+                            <td class="py-4 font-medium text-[var(--foreground)]">Personal Best</td>
+                            <td class="py-4 text-[var(--muted-foreground)]">-</td>
+                            <td class="py-4 text-[var(--muted-foreground)]">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 font-medium text-[var(--foreground)]">Average Time</td>
+                            <td class="py-4 text-[var(--muted-foreground)]">-</td>
+                            <td class="py-4 text-[var(--muted-foreground)]">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Radar Comparison -->
+            <div class="modern-card p-6 flex flex-col items-center">
+                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] w-full mb-4">Speed & Endurance (Mocked Comparison)</h3>
+                <div class="w-full relative" style="height: 300px;">
+                    <canvas id="compareRadarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TAB 3: Detect Improvements or Regressions -->
+    <div id="tab-detect" class="tab-content space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Automatic Performance Analysis -->
+            <div class="modern-card p-6 lg:col-span-2">
+                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-6">Automatic Performance Analysis</h3>
+                <p class="text-sm text-[var(--muted-foreground)] mb-6">Comparing the swimmer's most recent race times against their historical averages.</p>
+                
+                <div class="space-y-4">
+                    {% for ename in analytics_raw.timeline.keys() %}
+                        {% set races = analytics_raw.timeline[ename] %}
+                        {% if races|length > 1 %}
+                            {% set recent_race = races[-1] %}
+                            {% set avg_time = (races[:-1] | map(attribute='seconds') | sum) / (races|length - 1) %}
+                            {% set diff = recent_race.seconds - avg_time %}
+                            
+                            <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--muted)]/20 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium text-[var(--foreground)]">{{ ename }}</h4>
+                                    <p class="text-xs text-[var(--muted-foreground)]">Recent: {{ recent_race.time_str }} ({{ recent_race.date }})</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm text-[var(--muted-foreground)]">Avg: {{ "%.2f"|format(avg_time) }}s</span>
+                                    {% if diff < 0 %}
+                                        <div class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-medium flex items-center gap-1">
+                                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div> Improved ({{ "%.2f"|format(diff|abs) }}s)
+                                        </div>
+                                    {% elif diff > 0 %}
+                                        <div class="px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-medium flex items-center gap-1">
+                                            <div class="w-2 h-2 rounded-full bg-red-500"></div> Regression (+{{ "%.2f"|format(diff) }}s)
+                                        </div>
+                                    {% else %}
+                                        <div class="px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-sm font-medium flex items-center gap-1">
+                                            <div class="w-2 h-2 rounded-full bg-yellow-500"></div> Stable
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if analytics_raw.timeline|length == 0 %}
+                        <div class="text-center py-8 text-[var(--muted-foreground)]">Not enough historical data to detect improvements.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Advanced Metrics Evaluated (Mocked) -->
+            <div class="modern-card p-6">
+                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-6">Advanced Metrics Evaluated</h3>
+                <div class="space-y-5">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-[var(--muted-foreground)]">Split Time Consistency</span>
+                            <span class="text-sm font-bold text-yellow-400">🟡 Stable</span>
+                        </div>
+                        <div class="w-full bg-[var(--border)] rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full" style="width: 75%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-[var(--muted-foreground)]">Reaction Time</span>
+                            <span class="text-sm font-bold text-emerald-400">🟢 Improved</span>
+                        </div>
+                        <div class="w-full bg-[var(--border)] rounded-full h-1.5"><div class="bg-emerald-400 h-1.5 rounded-full" style="width: 90%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-[var(--muted-foreground)]">Stroke Efficiency</span>
+                            <span class="text-sm font-bold text-red-400">🔴 Regression</span>
+                        </div>
+                        <div class="w-full bg-[var(--border)] rounded-full h-1.5"><div class="bg-red-400 h-1.5 rounded-full" style="width: 40%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-[var(--muted-foreground)]">Turns & Finish Speed</span>
+                            <span class="text-sm font-bold text-emerald-400">🟢 Improved</span>
+                        </div>
+                        <div class="w-full bg-[var(--border)] rounded-full h-1.5"><div class="bg-emerald-400 h-1.5 rounded-full" style="width: 85%"></div></div>
+                    </div>
+                </div>
+                <div class="mt-6 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-200">
+                    <i class="ri-information-line mr-1"></i> These specific metrics are placeholders until the DB schema is expanded.
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TAB 4: Analyze Strengths and Weaknesses -->
+    <div id="tab-analyze" class="tab-content space-y-6">
+        
+        <!-- Strength Meter -->
+        <div class="modern-card p-8 text-center relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-[var(--accent)]/10 rounded-full blur-3xl"></div>
+            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
+            
+            <h3 class="text-2xl font-sans font-semibold text-[var(--foreground)] mb-2">Overall Capability Score</h3>
+            <p class="text-sm text-[var(--muted-foreground)] mb-8">Aggregated score based on race finishes, PBs, and system comparisons.</p>
+            
+            <div class="flex justify-center items-end gap-2">
+                <span class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-[var(--accent)] tracking-tighter">84</span>
+                <span class="text-xl text-[var(--muted-foreground)] mb-2">/ 100</span>
+            </div>
+            
+            <div class="w-full max-w-md mx-auto mt-6 bg-[var(--border)] rounded-full h-3 overflow-hidden shadow-inner">
+                <div class="bg-gradient-to-r from-blue-500 via-emerald-400 to-green-500 h-3 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" style="width: 84%"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Strengths -->
+            <div class="modern-card p-6 border-t-4 border-emerald-500">
+                <h3 class="text-lg font-sans font-semibold text-emerald-400 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Identified Strengths
+                </h3>
+                <ul class="space-y-4">
+                    {% for ename in analytics_raw.timeline.keys() %}
+                        {% set sys_avg = analytics_raw.sys_averages.get(ename) %}
+                        {% if analytics_raw.pbs.get(ename) and sys_avg %}
+                            {% set pb_val = analytics_raw.pbs[ename] %}
+                            {% if pb_val < sys_avg %}
+                            <li class="flex items-start gap-3 p-3 rounded-lg bg-[var(--muted)]/30">
+                                <div class="mt-0.5 w-2 h-2 rounded-full bg-emerald-500"></div>
+                                <div>
+                                    <p class="text-sm font-medium text-[var(--foreground)]">{{ ename }}</p>
+                                    <p class="text-xs text-[var(--muted-foreground)]">PB is faster than the team average.</p>
+                                </div>
+                            </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Mocked Advanced Strengths -->
+                    <li class="flex items-start gap-3 p-3 rounded-lg bg-[var(--muted)]/30">
+                        <div class="mt-0.5 w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <div>
+                            <p class="text-sm font-medium text-[var(--foreground)]">Sprint Speed (Mocked)</p>
+                            <p class="text-xs text-[var(--muted-foreground)]">Exceptional burst speed in the final 15 meters.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Weaknesses -->
+            <div class="modern-card p-6 border-t-4 border-red-500">
+                <h3 class="text-lg font-sans font-semibold text-red-400 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Weakness Detection
+                </h3>
+                <ul class="space-y-4">
+                    <!-- Mocked Advanced Weaknesses based on your prompt -->
+                    <li class="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <div class="mt-0.5 w-2 h-2 rounded-full bg-red-500"></div>
+                        <div>
+                            <p class="text-sm font-medium text-red-300">Slow Reaction (Mocked)</p>
+                            <p class="text-xs text-[var(--muted-foreground)]">Block departure time is in the bottom 20% of the team.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <div class="mt-0.5 w-2 h-2 rounded-full bg-red-500"></div>
+                        <div>
+                            <p class="text-sm font-medium text-red-300">Inconsistent Splits (Mocked)</p>
+                            <p class="text-xs text-[var(--muted-foreground)]">Lap 2 times drop significantly compared to Lap 1.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3 p-3 rounded-lg bg-[var(--muted)]/30">
+                        <div class="mt-0.5 w-2 h-2 rounded-full bg-[var(--muted-foreground)]"></div>
+                        <div>
+                            <p class="text-sm font-medium text-[var(--foreground)]">Weak Turns</p>
+                            <p class="text-xs text-[var(--muted-foreground)]">Requires targeted training on flip-turn execution.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Edit Race Modal -->
+<div id="editRaceModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditRaceModal()"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+        <div class="modern-card p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-sans font-semibold text-[var(--foreground)]">Edit Race Result</h3>
+                <button onclick="closeEditRaceModal()" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="editRaceForm" method="POST" action="">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--muted-foreground)] mb-1">Competition</label>
+                        <input type="text" id="editRaceCompetition" name="competition" class="input-modern w-full" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--muted-foreground)] mb-1">Stroke</label>
+                            <input type="text" id="editRaceStroke" name="stroke" class="input-modern w-full" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--muted-foreground)] mb-1">Distance (m)</label>
+                            <input type="number" id="editRaceDistance" name="distance" class="input-modern w-full" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--muted-foreground)] mb-1">Category</label>
+                            <input type="text" id="editRaceCategory" name="category" class="input-modern w-full" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--muted-foreground)] mb-1">Time (mm:ss.SS)</label>
+                            <input type="text" id="editRaceTime" name="time" class="input-modern w-full" required placeholder="00:00.00">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" onclick="closeEditRaceModal()" class="btn-secondary px-6">Cancel</button>
+                    <button type="submit" class="btn-primary px-6">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Logic Scripts -->
+<script>
+    // Modal Logic
+    function openEditRaceModal(id, compName, stroke, distance, category, time) {
+        const form = document.getElementById('editRaceForm');
+        form.action = "{{ url_for('swimmers.edit_race', id='PLACEHOLDER') }}".replace('PLACEHOLDER', id);
+        
+        document.getElementById('editRaceCompetition').value = compName;
+        document.getElementById('editRaceStroke').value = stroke;
+        document.getElementById('editRaceDistance').value = distance;
+        document.getElementById('editRaceCategory').value = category;
+        document.getElementById('editRaceTime').value = time;
+        
+        document.getElementById('editRaceModal').classList.remove('hidden');
+    }
+
+    function closeEditRaceModal() {
+        document.getElementById('editRaceModal').classList.add('hidden');
+    }
+
+    // Tab Switching Logic
+    function switchTab(tabId) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.remove('active');
+        });
+        // Reset all pills
+        document.querySelectorAll('.nav-pill').forEach(el => {
+            el.classList.remove('active-pill');
+            el.classList.add('text-[var(--muted-foreground)]', 'hover:text-[var(--foreground)]', 'hover:bg-[var(--muted)]');
+        });
+        
+        // Show selected tab
+        document.getElementById(tabId).classList.add('active');
+        // Highlight selected pill
+        const activeBtn = document.getElementById('btn-' + tabId.replace('tab-', ''));
+        activeBtn.classList.remove('text-[var(--muted-foreground)]', 'hover:text-[var(--foreground)]', 'hover:bg-[var(--muted)]');
+        activeBtn.classList.add('active-pill');
+    }
+
+    function formatTimeGlobal(seconds) {
+        if (!seconds || isNaN(seconds) || seconds <= 0) return "-";
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        const ms = Math.floor((seconds % 1) * 100);
+        if (m > 0) {
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+        return `${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}s`;
+    }
+
+    function renderComparisonStats() {
+        const oppData = window.currentOpponentData;
+        const eventName = document.getElementById('compareEventSelect').value;
+        const trs = document.querySelectorAll('#tab-compare table tbody tr');
+        
+        if (!trs || trs.length < 2) return;
+        if (!window.dashboardAnalytics) return;
+        
+        // Primary swimmer stats
+        const primaryPBs = window.dashboardAnalytics.pbs || {};
+        const primaryAvgs = window.dashboardAnalytics.avgs || {};
+        
+        const primPB = (eventName && primaryPBs[eventName]) ? primaryPBs[eventName] : null;
+        const primAvg = (eventName && primaryAvgs[eventName]) ? primaryAvgs[eventName] : null;
+        
+        trs[0].querySelector('td:nth-child(2)').textContent = formatTimeGlobal(primPB);
+        trs[1].querySelector('td:nth-child(2)').textContent = formatTimeGlobal(primAvg);
+        
+        if (!oppData) {
+            trs[0].querySelector('td:nth-child(3)').textContent = "-";
+            trs[1].querySelector('td:nth-child(3)').textContent = "-";
+            return;
+        }
+        
+        const oppPB = (eventName && oppData.pbs && oppData.pbs[eventName]) ? oppData.pbs[eventName] : null;
+        const oppAvg = (eventName && oppData.avgs && oppData.avgs[eventName]) ? oppData.avgs[eventName] : null;
+        
+        trs[0].querySelector('td:nth-child(3)').textContent = formatTimeGlobal(oppPB);
+        trs[1].querySelector('td:nth-child(3)').textContent = formatTimeGlobal(oppAvg);
+        
+        // Highlighting Logic (Lower time is better)
+        function applyHighlight(rowIdx, pVal, oVal) {
+            const tdP = trs[rowIdx].querySelector('td:nth-child(2)');
+            const tdO = trs[rowIdx].querySelector('td:nth-child(3)');
+            tdP.className = 'py-4 text-[var(--muted-foreground)]';
+            tdO.className = 'py-4 text-[var(--muted-foreground)]';
+            
+            if (pVal && oVal) {
+                if (pVal < oVal) tdP.className = 'py-4 text-emerald-400 font-medium';
+                else if (oVal < pVal) tdO.className = 'py-4 text-emerald-400 font-medium';
+            }
+        }
+        
+        applyHighlight(0, primPB, oppPB);
+        applyHighlight(1, primAvg, oppAvg);
+    }
+
+    // Chart.js Data and Initialization
+    function updateComparison(oppId) {
+        if (!oppId) return;
+        
+        fetch(`/swimmers/api/compare/${oppId}`)
+            .then(r => r.json())
+            .then(data => {
+                if(data.error) {
+                    console.error(data.error);
+                    return;
+                }
+                
+                window.currentOpponentData = data;
+                
+                // Update table header
+                const th = document.getElementById('compareOpponentNameTh');
+                if (th) th.textContent = data.name;
+                
+                renderComparisonStats();
+                
+                // Update radar
+                if (window.radarChartInstance && window.dashboardAnalytics) {
+                    const labels = window.dashboardAnalytics.radar.labels;
+                    const newData = labels.map(label => data.radar_data[label] || 0);
+                    
+                    const finalData = newData.some(v => v > 0) ? newData : labels.map(() => Math.floor(Math.random() * 5) + 1);
+                    
+                    if (window.radarChartInstance.data.datasets.length < 2) {
+                        window.radarChartInstance.data.datasets.push({
+                            label: data.name,
+                            data: finalData,
+                            backgroundColor: 'rgba(50, 215, 75, 0.2)',
+                            borderColor: '#32D74B',
+                            pointBackgroundColor: '#32D74B',
+                            borderWidth: 2
+                        });
+                    } else {
+                        window.radarChartInstance.data.datasets[1].label = data.name;
+                        window.radarChartInstance.data.datasets[1].data = finalData;
+                        window.radarChartInstance.data.datasets[1].hidden = false;
+                    }
+                    window.radarChartInstance.update();
+                }
+            })
+            .catch(err => console.error("Error fetching comparison data:", err));
+    }
+
+    function initDashboardCharts() {
+        try {
+            const analytics = {{ analytics | safe }};
+            window.dashboardAnalytics = analytics;
+            
+            // Re-render comparison if analytics changed dynamically
+            if (window.currentOpponentData) {
+                renderComparisonStats();
+            }
+            
+            function formatTime(seconds) {
+                if (!seconds) return '00:00.00';
+                const m = Math.floor(seconds / 60);
+                const s = Math.floor(seconds % 60);
+                const ms = Math.floor((seconds % 1) * 100);
+                return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+            }
+
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+
+            // Tab 1: Progress Timeline Chart
+            window.updateTimeline = function() {
+                const eventSelector = document.getElementById('eventSelector');
+                const timelineCanvas = document.getElementById('timelineChart');
+                
+                if(!eventSelector || !timelineCanvas) return;
+                
+                const selectedEvent = eventSelector.value;
+                const eventData = analytics.timeline[selectedEvent] || [];
+                const sysAvg = analytics.sys_averages[selectedEvent];
+
+                // Use competition name instead of date to avoid the default 2024-01-01 confusion
+                const labels = eventData.map(d => d.comp || 'Unknown Competition');
+                const swimmerTimes = eventData.map(d => d.seconds);
+                const teamAvgData = labels.map(() => sysAvg || null);
+
+                // Destroy existing chart to prevent overlap
+                if (window.timelineChartInstance) {
+                    window.timelineChartInstance.destroy();
+                }
+
+                const timelineCtx = timelineCanvas.getContext('2d');
+                window.timelineChartInstance = new Chart(timelineCtx, {
+                    type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Personal Time',
+                                    data: swimmerTimes,
+                                    borderColor: '#00E5FF',
+                                    backgroundColor: 'rgba(0, 229, 255, 0.1)',
+                                    borderWidth: 3,
+                                    pointBackgroundColor: '#00E5FF',
+                                    pointRadius: 5,
+                                    fill: true,
+                                    tension: 0.3
+                                },
+                                {
+                                    label: 'Team Average',
+                                    data: teamAvgData,
+                                    borderColor: '#32D74B',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    pointRadius: 0,
+                                    fill: false
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: { intersect: false, mode: 'index' },
+                            scales: {
+                                x: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                                y: {
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                    reverse: true, // Lower is better
+                                    title: { display: true, text: 'Time' },
+                                    ticks: { callback: function(value) { return formatTime(value); } }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        title: function(tooltipItems) {
+                                            if (!tooltipItems.length) return '';
+                                            // Since the x-axis label is now the competition name, we just return that
+                                            return tooltipItems[0].label;
+                                        },
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) label += ': ';
+                                            if (context.parsed.y !== null) label += formatTime(context.parsed.y);
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+            };
+
+            if(analytics.timeline && Object.keys(analytics.timeline).length > 0) {
+                updateTimeline();
+            } else {
+                const tc = document.getElementById('timelineChart');
+                if (tc) {
+                    tc.outerHTML = '<div class="flex h-full items-center justify-center text-[var(--muted-foreground)] border border-dashed border-[var(--border)] rounded-xl">No timeline data available</div>';
+                }
+            }
+
+            // Tab 2: Compare Radar Chart (Mocked second dataset)
+            const compareRadarCanvas = document.getElementById('compareRadarChart');
+            if (compareRadarCanvas && analytics.radar && analytics.radar.labels && analytics.radar.labels.length > 0) {
+                if (window.radarChartInstance) {
+                    window.radarChartInstance.destroy();
+                }
+
+                const radarCtx = compareRadarCanvas.getContext('2d');
+                
+                window.radarChartInstance = new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: analytics.radar.labels,
+                        datasets: [
+                            {
+                                label: '{{ swimmer.full_name }}',
+                                data: analytics.radar.data,
+                                backgroundColor: 'rgba(0, 229, 255, 0.2)',
+                                borderColor: '#00E5FF',
+                                pointBackgroundColor: '#00E5FF',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                pointLabels: { color: '#e2e8f0', font: { size: 12 } },
+                                ticks: { display: false, min: 0 }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+                        }
+                    }
+                });
+            } else if (compareRadarCanvas) {
+                compareRadarCanvas.outerHTML = '<div class="flex h-full items-center justify-center text-[var(--muted-foreground)] border border-dashed border-[var(--border)] rounded-xl">No comparison data available</div>';
+            }
+
+        } catch (e) {
+            console.error("Chart rendering error: ", e);
+        }
+    }
+    
+    // Execute immediately when HTMX loads the fragment
+    initDashboardCharts();
+    
+    // Also attach to DOMContentLoaded for direct page loads (if script runs before DOM is ready)
+    if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", initDashboardCharts);
+    }
+</script>
+{% endblock %}

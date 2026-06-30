@@ -1,0 +1,56 @@
+{% extends "dashboard_layout.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-8 animate-fade-in-up">
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="section-badge mb-4">
+                <span class="section-badge-dot"></span>
+                <span class="section-badge-text">Profile</span>
+            </div>
+            <h1 class="text-4xl font-serif text-[var(--foreground)] tracking-tight">{% if swimmer %}Edit{% else %}Add{% endif %} Swimmer</h1>
+        </div>
+        <a href="{{ url_for('swimmers.index') }}" class="btn-ghost">Back to List</a>
+    </div>
+
+    <div class="modern-card p-6 md:p-10">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-3 rounded-lg text-sm {{ 'bg-red-500/20 text-red-500 border border-red-500/30' if category == 'error' else 'bg-green-500/20 text-green-500 border border-green-500/30' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label for="full_name" class="block text-sm font-medium text-[var(--foreground)]">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ swimmer.full_name if swimmer else '' }}" required class="input-modern">
+                </div>
+                
+                <div class="space-y-2">
+                    <label for="birthday" class="block text-sm font-medium text-[var(--foreground)]">Birthday</label>
+                    <input type="date" id="birthday" name="birthday" value="{{ swimmer.birthday if swimmer else '' }}" required class="input-modern">
+                </div>
+
+                <div class="space-y-2">
+                    <label for="gender" class="block text-sm font-medium text-[var(--foreground)]">Gender</label>
+                    <select id="gender" name="gender" class="input-modern bg-[var(--card)]">
+                        <option value="Male" {% if swimmer and swimmer.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if swimmer and swimmer.gender == 'Female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-6 flex justify-end">
+                <button type="submit" class="btn-primary">
+                    Save Swimmer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

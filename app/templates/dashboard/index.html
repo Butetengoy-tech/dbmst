@@ -584,6 +584,11 @@ function initFullCalendarEngine() {
     const calendarEl = document.getElementById('fullCalendarContainer');
     if (!calendarEl) return;
 
+    if (typeof FullCalendar === 'undefined') {
+        setTimeout(initFullCalendarEngine, 100);
+        return;
+    }
+
     let calendarEvents = [];
     try {
         calendarEvents = JSON.parse('{{ stats.calendar_events_json | safe }}');
@@ -617,6 +622,8 @@ function initFullCalendarEngine() {
     });
 
     calendar.render();
+    setTimeout(() => { calendar.updateSize(); }, 100);
+    setTimeout(() => { calendar.updateSize(); }, 500);
 }
 
 if (document.readyState === 'loading') {
@@ -624,5 +631,7 @@ if (document.readyState === 'loading') {
 } else {
     initFullCalendarEngine();
 }
+window.addEventListener('load', initFullCalendarEngine);
+setTimeout(initFullCalendarEngine, 200);
 </script>
 {% endblock %}

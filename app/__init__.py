@@ -29,4 +29,13 @@ def create_app(config_class=Config):
     def health_check():
         return {'status': 'ok'}
 
+    from flask import send_from_directory
+    @app.route('/manifest.json')
+    def pwa_manifest():
+        return send_from_directory(app.static_folder, 'manifest.json')
+
+    @app.route('/sw.js')
+    def pwa_service_worker():
+        return send_from_directory(app.static_folder, 'sw.js')
+
     return app

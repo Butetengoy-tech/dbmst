@@ -93,4 +93,4 @@ def logout():
     session.clear()
     if supabase:
         supabase.auth.sign_out()
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('main.index'))

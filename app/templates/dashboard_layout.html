@@ -17,9 +17,9 @@
          style="display: none;">
     </div>
 
-    <!-- Sidebar -->
+    <!-- Sidebar Drawer -->
     <aside class="fixed inset-y-0 left-0 z-50 premium-sidebar-bg flex flex-col transition-all duration-300 ease-in-out md:static md:translate-x-0 border-r border-white/10 shrink-0 relative overflow-hidden select-none"
-           :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen, 'w-20': desktopCollapsed, 'w-72': !desktopCollapsed}">
+           :class="{'translate-x-0 w-72': sidebarOpen, '-translate-x-full': !sidebarOpen, 'md:w-20': desktopCollapsed, 'md:w-72': !desktopCollapsed}">
         
         <!-- Ambient Glowing Effect -->
         <div class="sidebar-ambient-glow"></div>

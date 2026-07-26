@@ -26,12 +26,11 @@
     <main
         class="flex-1 flex flex-col items-center justify-center px-6 py-16 relative z-10 max-w-5xl mx-auto text-center animate-fade-in-up">
 
-        <!-- Glowing Logo Badge -->
-        <div class="relative group mb-8">
-            <div
-                class="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-slate-900/90 border border-cyan-500/40 p-5 shadow-[0_0_60px_rgba(0,229,255,0.3)] group-hover:shadow-[0_0_90px_rgba(0,229,255,0.5)] group-hover:border-cyan-400 transition-all duration-500 backdrop-blur-xl flex items-center justify-center">
+        <!-- Glowing Logo Emblem (Clean Floating Logo without Square Box) -->
+        <div class="relative group mb-8 flex items-center justify-center">
+            <div class="w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center animate-logo-float">
                 <img src="{{ url_for('static', filename='image/logo_bluemarlins.png') }}" alt="DBMST Logo"
-                    class="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(0,229,255,0.4)] group-hover:scale-105 transition-transform duration-500">
+                    class="w-full h-full object-contain filter drop-shadow-[0_0_25px_rgba(0,229,255,0.65)] drop-shadow-[0_0_50px_rgba(16,185,129,0.35)] group-hover:scale-110 transition-transform duration-500">
             </div>
         </div>
 

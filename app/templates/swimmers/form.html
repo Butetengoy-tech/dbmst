@@ -1,56 +1,187 @@
 {% extends "dashboard_layout.html" %}
 
 {% block content %}
+<!-- Cropper.js CSS & JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
 <div class="max-w-2xl mx-auto space-y-8 animate-fade-in-up">
-    <div class="flex items-center justify-between">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-white/10 pb-6">
         <div>
-            <div class="section-badge mb-4">
-                <span class="section-badge-dot"></span>
-                <span class="section-badge-text">Profile</span>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 tracking-wider uppercase">Athlete Profile</span>
             </div>
-            <h1 class="text-4xl font-serif text-[var(--foreground)] tracking-tight">{% if swimmer %}Edit{% else %}Add{% endif %} Swimmer</h1>
+            <h1 class="text-3xl font-serif font-bold text-white tracking-tight">{% if swimmer %}Edit Athlete{% else %}Register Swimmer{% endif %}</h1>
         </div>
-        <a href="{{ url_for('swimmers.index') }}" class="btn-ghost">Back to List</a>
+        <a href="{{ url_for('swimmers.index') }}" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+            &larr; Back to Roster
+        </a>
     </div>
 
-    <div class="modern-card p-6 md:p-10">
+    <!-- Glass Form Card -->
+    <div class="glass-card p-8 border border-white/10">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-4 p-3 rounded-lg text-sm {{ 'bg-red-500/20 text-red-500 border border-red-500/30' if category == 'error' else 'bg-green-500/20 text-green-500 border border-green-500/30' }}">
-                        {{ message }}
+                    <div class="mb-6 p-4 rounded-xl text-xs font-medium flex items-center justify-between {{ 'bg-red-500/15 text-red-300 border border-red-500/30' if category == 'error' else 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' }}">
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.style.display='none'" class="text-current opacity-70 hover:opacity-100">&times;</button>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         <form method="POST" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label for="full_name" class="block text-sm font-medium text-[var(--foreground)]">Full Name</label>
-                    <input type="text" id="full_name" name="full_name" value="{{ swimmer.full_name if swimmer else '' }}" required class="input-modern">
+            <!-- Profile Picture Header & Live Preview -->
+            <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col sm:flex-row items-center gap-5">
+                <div class="relative group shrink-0">
+                    <div class="w-20 h-20 rounded-2xl bg-slate-900 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,229,255,0.2)] flex items-center justify-center">
+                        <img id="avatarPreview" 
+                             src="{{ swimmer.profile_image_url if swimmer and swimmer.profile_image_url else url_for('static', filename='image/logo_bluemarlins.png') }}" 
+                             alt="Swimmer Avatar Preview" 
+                             class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <div class="space-y-2.5 w-full">
+                    <div class="flex items-center justify-between">
+                        <label for="profile_image_url" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Profile Picture Photo</label>
+                        <!-- File Upload Trigger Button -->
+                        <label for="avatarFileInput" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 cursor-pointer transition-all inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <span>Upload & Crop Photo</span>
+                        </label>
+                        <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                    </div>
+
+                    <input type="text" 
+                           id="profile_image_url" 
+                           name="profile_image_url" 
+                           value="{{ swimmer.profile_image_url if swimmer and swimmer.profile_image_url else '' }}" 
+                           placeholder="Image web URL or uploaded data URL..." 
+                           class="glass-input text-xs"
+                           oninput="document.getElementById('avatarPreview').src = this.value || '{{ url_for('static', filename='image/logo_bluemarlins.png') }}'">
+                    <p class="text-[11px] text-slate-400">Select a local photo file to crop or paste an image URL.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="space-y-1.5 sm:col-span-2">
+                    <label for="full_name" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ swimmer.full_name if swimmer else '' }}" required placeholder="e.g. Alex Smith" class="glass-input text-sm">
                 </div>
                 
-                <div class="space-y-2">
-                    <label for="birthday" class="block text-sm font-medium text-[var(--foreground)]">Birthday</label>
-                    <input type="date" id="birthday" name="birthday" value="{{ swimmer.birthday if swimmer else '' }}" required class="input-modern">
+                <div class="space-y-1.5">
+                    <label for="birthday" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Date of Birth</label>
+                    <input type="date" id="birthday" name="birthday" value="{{ swimmer.birthday if swimmer else '' }}" required class="glass-input text-sm">
                 </div>
 
-                <div class="space-y-2">
-                    <label for="gender" class="block text-sm font-medium text-[var(--foreground)]">Gender</label>
-                    <select id="gender" name="gender" class="input-modern bg-[var(--card)]">
+                <div class="space-y-1.5">
+                    <label for="gender" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Gender</label>
+                    <select id="gender" name="gender" class="glass-input text-sm">
                         <option value="Male" {% if swimmer and swimmer.gender == 'Male' %}selected{% endif %}>Male</option>
                         <option value="Female" {% if swimmer and swimmer.gender == 'Female' %}selected{% endif %}>Female</option>
                     </select>
                 </div>
             </div>
 
-            <div class="pt-6 flex justify-end">
-                <button type="submit" class="btn-primary">
-                    Save Swimmer
+            <div class="pt-6 border-t border-white/10 flex justify-end gap-3">
+                <a href="{{ url_for('swimmers.index') }}" class="px-5 py-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-xl text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all">
+                    Save Athlete Profile
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<!-- Image Cropping Glass Modal -->
+<div id="cropModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding: 20px;" class="backdrop-blur-md">
+    <div class="glass-card p-6 max-w-lg w-full relative border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.9)] animate-fade-in-up">
+        <button onclick="closeCropModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl focus:outline-none">&times;</button>
+        <div class="mb-4 text-center">
+            <h2 class="text-xl font-serif font-bold text-white">Crop Profile Photo</h2>
+            <p class="text-xs text-slate-400 mt-1">Adjust and crop the photo to a square profile picture.</p>
+        </div>
+
+        <div class="w-full h-64 sm:h-72 bg-slate-950 rounded-xl overflow-hidden mb-6 flex items-center justify-center border border-white/10">
+            <img id="cropImage" src="" alt="Crop Target" class="max-w-full max-h-full">
+        </div>
+
+        <div class="flex gap-3">
+            <button type="button" onclick="closeCropModal()" class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+                Cancel
+            </button>
+            <button type="button" onclick="applyCrop()" class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all">
+                Crop & Apply Photo
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let cropperInstance = null;
+
+function handleFileSelect(event) {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const cropImage = document.getElementById('cropImage');
+            cropImage.src = e.target.result;
+
+            const cropModal = document.getElementById('cropModal');
+            cropModal.style.display = 'flex';
+
+            if (cropperInstance) {
+                cropperInstance.destroy();
+            }
+
+            cropperInstance = new Cropper(cropImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                movable: true,
+                zoomable: true,
+                rotatable: true,
+                scalable: true,
+                autoCropArea: 0.9,
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function closeCropModal() {
+    const cropModal = document.getElementById('cropModal');
+    cropModal.style.display = 'none';
+    if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
+    document.getElementById('avatarFileInput').value = '';
+}
+
+function applyCrop() {
+    if (!cropperInstance) return;
+    const canvas = cropperInstance.getCroppedCanvas({
+        width: 300,
+        height: 300,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+    });
+
+    if (canvas) {
+        const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        document.getElementById('profile_image_url').value = croppedDataUrl;
+        document.getElementById('avatarPreview').src = croppedDataUrl;
+    }
+
+    closeCropModal();
+}
+</script>
 {% endblock %}
+
+

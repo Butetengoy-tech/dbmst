@@ -29,10 +29,26 @@ def login():
                 session['user_id'] = response.user.id
                 session['access_token'] = response.session.access_token
                 
-                # Fetch role
-                profile = supabase.table('user_profiles').select('role').eq('id', response.user.id).execute()
-                if profile.data:
-                    session['role'] = profile.data[0]['role']
+                # Check swimmer roster matching if user has Swimmer role
+                role = session.get('role', 'Swimmer')
+                if role == 'Swimmer':
+                    swimmer = supabase.table('swimmers').select('*').or_(f"user_id.eq.{response.user.id},email.eq.{email}").execute()
+                    if swimmer.data:
+                        swimmer_info = swimmer.data[0]
+                        session['swimmer_id'] = swimmer_info['id']
+                        session['swimmer_unmatched'] = False
+                        if swimmer_info.get('profile_image_url'):
+                            session['profile_image_url'] = swimmer_info['profile_image_url']
+                        if swimmer_info.get('full_name'):
+                            session['username'] = swimmer_info['full_name']
+                        # Link user_id if missing
+                        if not swimmer_info.get('user_id'):
+                            supabase.table('swimmers').update({"user_id": response.user.id}).eq('id', swimmer_info['id']).execute()
+                    else:
+                        session['swimmer_unmatched'] = True
+                        flash("Account not matched with an official DBMST Swimmer profile. Please contact Coach Amil.", "warning")
+                else:
+                    session['swimmer_unmatched'] = False
                 
                 return redirect(url_for('dashboard.index'))
             else:
@@ -54,6 +70,15 @@ def register():
             if supabase:
                 response = supabase.auth.sign_up({"email": email, "password": password})
                 
+                # Insert profile record with role
+                if hasattr(response, 'user') and response.user:
+                    supabase.table('user_profiles').insert({
+                        "id": response.user.id,
+                        "email": email,
+                        "full_name": full_name,
+                        "role": role
+                    }).execute()
+
                 flash("Registration successful. Please login.", "success")
                 return redirect(url_for('auth.login'))
             else:

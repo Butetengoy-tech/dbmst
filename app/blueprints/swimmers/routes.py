@@ -29,7 +29,7 @@ def index():
     if supabase:
         try:
             role = session.get('role')
-            if role in ('HeadCoach', 'System Administrator'):
+            if role in ('HeadCoach', 'System Administrator', 'Parent'):
                 response = supabase.table('swimmers').select('*').execute()
             elif role == 'AsstCoach':
                 # Assuming assistant coaches can see swimmers assigned to them
@@ -64,15 +64,27 @@ def add():
         full_name = request.form.get('full_name')
         birthday = request.form.get('birthday')
         gender = request.form.get('gender')
+        profile_image_url = request.form.get('profile_image_url')
         
+        insert_payload = {
+            "full_name": full_name,
+            "birthday": birthday,
+            "gender": gender
+        }
+        if profile_image_url:
+            insert_payload["profile_image_url"] = profile_image_url
+
         try:
             if supabase:
-                supabase.table('swimmers').insert({
-                    "full_name": full_name,
-                    "birthday": birthday,
-                    "gender": gender
-                    # add other fields as necessary
-                }).execute()
+                try:
+                    supabase.table('swimmers').insert(insert_payload).execute()
+                except Exception as insert_err:
+                    if 'profile_image_url' in str(insert_err):
+                        insert_payload.pop("profile_image_url", None)
+                        supabase.table('swimmers').insert(insert_payload).execute()
+                    else:
+                        raise insert_err
+
                 flash("Swimmer added successfully.", "success")
                 return redirect(url_for('swimmers.index'))
         except Exception as e:
@@ -82,25 +94,52 @@ def add():
 
 @swimmers_bp.route('/<string:id>/edit', methods=['GET', 'POST'])
 @login_required
-@role_required('HeadCoach')
 def edit(id):
     if not supabase:
         flash("Database not connected.", "error")
         return redirect(url_for('swimmers.index'))
+
+    # Check permission: HeadCoach, AsstCoach, Admin OR Swimmer editing their own profile
+    user_role = session.get('role')
+    is_admin_or_coach = user_role in ('HeadCoach', 'AsstCoach', 'System Administrator')
+    is_own_profile = (user_role == 'Swimmer' and session.get('swimmer_id') == id)
+
+    if not (is_admin_or_coach or is_own_profile):
+        flash("You do not have permission to edit this profile.", "error")
+        return redirect(url_for('dashboard.index'))
 
     try:
         if request.method == 'POST':
             full_name = request.form.get('full_name')
             birthday = request.form.get('birthday')
             gender = request.form.get('gender')
+            profile_image_url = request.form.get('profile_image_url')
             
-            supabase.table('swimmers').update({
+            update_payload = {
                 "full_name": full_name,
                 "birthday": birthday,
                 "gender": gender
-            }).eq('id', id).execute()
+            }
+            if profile_image_url:
+                update_payload["profile_image_url"] = profile_image_url
+
+            try:
+                supabase.table('swimmers').update(update_payload).eq('id', id).execute()
+            except Exception as update_err:
+                if 'profile_image_url' in str(update_err):
+                    update_payload.pop("profile_image_url", None)
+                    supabase.table('swimmers').update(update_payload).eq('id', id).execute()
+                else:
+                    raise update_err
             
-            flash("Swimmer updated successfully.", "success")
+            # If swimmer edited their own profile, update session data
+            if is_own_profile or session.get('swimmer_id') == id:
+                if full_name: session['username'] = full_name
+                if profile_image_url: session['profile_image_url'] = profile_image_url
+
+            flash("Profile updated successfully.", "success")
+            if user_role == 'Swimmer':
+                return redirect(url_for('swimmers.view', id=id))
             return redirect(url_for('swimmers.index'))
             
         # GET request
@@ -113,6 +152,21 @@ def edit(id):
     except Exception as e:
         flash(str(e), "error")
         return redirect(url_for('swimmers.index'))
+
+@swimmers_bp.route('/<string:id>/delete', methods=['POST'])
+@login_required
+@role_required('HeadCoach', 'System Administrator')
+def delete_swimmer(id):
+    if supabase:
+        try:
+            supabase.table('race_results').delete().eq('swimmer_id', id).execute()
+            supabase.table('swimmers').delete().eq('id', id).execute()
+            flash("Swimmer record deleted successfully.", "success")
+        except Exception as e:
+            flash(f"Error deleting swimmer: {str(e)}", "error")
+    else:
+        flash("Demo mode: Swimmer deleted.", "success")
+    return redirect(url_for('swimmers.index'))
 
 import json
 from collections import defaultdict

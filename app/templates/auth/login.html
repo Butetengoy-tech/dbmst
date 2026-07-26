@@ -1,94 +1,285 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="min-h-[85vh] flex items-center justify-center py-8 px-4">
-    <div class="modern-card w-full max-w-5xl overflow-hidden flex flex-col md:flex-row animate-fade-in-up p-0">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 bg-[#080B11] relative overflow-hidden select-none">
 
-        <!-- Visual Panel (Left side) -->
-        <div class="hidden md:flex md:w-1/2 bg-slate-900 relative items-center justify-center p-12">
-            <!-- Subtle Dot Pattern Background -->
-            <div class="absolute inset-0 z-0 opacity-20"
-                style="background: radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px); background-size: 32px 32px;">
+    <!-- 3D Animated WebGL Canvas Container -->
+    <canvas id="three-login-bg" class="absolute inset-0 z-0 opacity-60 pointer-events-none"></canvas>
+
+    <!-- Background Glow Elements -->
+    <div
+        class="absolute top-[20%] left-[15%] w-[500px] h-[500px] rounded-full bg-cyan-500/15 blur-[140px] pointer-events-none z-0">
+    </div>
+    <div
+        class="absolute bottom-[20%] right-[15%] w-[500px] h-[500px] rounded-full bg-blue-600/15 blur-[140px] pointer-events-none z-0">
+    </div>
+
+    <!-- Main Container Glass Card -->
+    <div
+        class="glass-card w-full max-w-5xl overflow-hidden flex flex-col md:flex-row shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/10 relative z-10 animate-fade-in-up p-0">
+
+        <!-- Left Visual Panel -->
+        <div
+            class="hidden md:flex md:w-1/2 bg-gradient-to-br from-slate-950/90 via-slate-900/80 to-slate-950/90 relative items-center justify-center p-12 overflow-hidden border-r border-white/10 backdrop-blur-xl">
+            <!-- Grid Background Overlay -->
+            <div class="absolute inset-0 z-0 opacity-20 pointer-events-none"
+                style="background-image: radial-gradient(rgba(0, 229, 255, 0.5) 1px, transparent 1px); background-size: 32px 32px;">
             </div>
 
-            <!-- Ambient Glows -->
-            <div class="absolute top-[-15%] left-[-15%] w-72 h-72 rounded-full bg-blue-500/30 blur-[80px] z-0"></div>
-            <div class="absolute bottom-[-15%] right-[-15%] w-72 h-72 rounded-full bg-indigo-500/30 blur-[80px] z-0">
-            </div>
-
-            <div class="z-10 text-center relative w-full">
-                <div
-                    class="inline-flex items-center justify-center w-40 h-40 rounded-3xl bg-blue-500/10 backdrop-blur-xl shadow-[0_0_50px_rgba(59,130,246,0.5)] mb-10 border border-blue-400/30 p-4 relative group hover:shadow-[0_0_60px_rgba(59,130,246,0.7)] transition-shadow duration-300">
-                    <img src="{{ url_for('static', filename='image/logo_bluemarlins.png') }}" alt="DBMST Logo"
-                        class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+            <div class="z-10 text-center relative w-full flex flex-col items-center">
+                <!-- Glowing Animated Emblem -->
+                <div class="relative group mb-8">
+                    <!-- Spinning Ambient Neon Ring -->
+                    <div class="absolute -inset-2 rounded-3xl bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 opacity-40 blur-lg animate-ring-spin group-hover:opacity-75 transition-opacity"></div>
+                    
+                    <div class="w-36 h-36 rounded-3xl bg-slate-900/90 border border-cyan-500/50 p-5 shadow-[0_0_50px_rgba(0,229,255,0.4)] group-hover:shadow-[0_0_80px_rgba(0,229,255,0.7)] transition-all duration-500 backdrop-blur-xl flex items-center justify-center relative z-10 animate-logo-float">
+                        <img src="{{ url_for('static', filename='image/logo_bluemarlins.png') }}" alt="DBMST Logo"
+                            class="w-full h-full object-contain animate-aura-glow transition-transform duration-500 group-hover:scale-110">
+                    </div>
                 </div>
-                <h3 class="text-4xl font-serif text-white mb-6 tracking-tight leading-tight">Davnor Blue Marlins<br>Swim
-                    Team</h3>
-                <p class="text-slate-300 text-lg max-w-[280px] mx-auto leading-relaxed">
-                    Swim Hard, Dream Big.
+
+                <div class="badge-neon mb-4">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span>DBMST</span>
+                </div>
+
+                <h3 class="text-3xl font-serif font-bold text-white tracking-tight leading-tight mb-3">
+                    Davnor Blue Marlins
+                </h3>
+                <p class="text-slate-400 text-sm max-w-xs leading-relaxed font-sans">
+                    Swim Hard. Dream Big.
                 </p>
             </div>
         </div>
 
-        <!-- Form Panel (Right side) -->
-        <div class="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-[var(--card)]">
+        <!-- Right Form Panel -->
+        <div class="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center bg-slate-950/70 backdrop-blur-2xl">
             <div class="mb-8">
-                <div class="section-badge mb-6">
-                    <span class="section-badge-dot"></span>
-                    <span class="section-badge-text">Authentication</span>
+                <div class="flex items-center gap-2 mb-3">
+                    <span
+                        class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 tracking-wider uppercase">Portal
+                        Access</span>
                 </div>
-                <h2 class="text-4xl font-serif gradient-text tracking-tight pb-1">Welcome Back</h2>
-                <p class="text-[var(--muted-foreground)] mt-2">Sign in to DBMST</p>
+                <h2 class="text-3xl font-serif font-bold text-white tracking-tight">Welcome Back</h2>
+                <p class="text-slate-400 text-sm mt-1">Sign in to your DBMST dashboard account</p>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
             <div
-                class="mb-6 p-4 rounded-xl text-sm {{ 'bg-red-500/10 text-red-600 border border-red-500/20' if category == 'error' else 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' }}">
-                {{ message }}
+                class="mb-6 p-4 rounded-xl text-xs font-medium flex items-center justify-between {{ 'bg-red-500/15 text-red-300 border border-red-500/30' if category == 'error' else 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' }}">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.style.display='none'"
+                    class="text-current opacity-70 hover:opacity-100">&times;</button>
             </div>
             {% endfor %}
             {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-6">
-                <div class="space-y-2">
-                    <label for="email" class="block text-sm font-medium text-[var(--foreground)]">Username or
+            <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-5">
+                <div class="space-y-1.5">
+                    <label for="email"
+                        class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Username or
                         Email</label>
-                    <input type="text" id="email" name="email" required class="input-modern bg-[var(--card)]">
+                    <input type="text" id="email" name="email" required placeholder="Enter username or email"
+                        class="glass-input text-sm">
                 </div>
 
-                <div class="space-y-2">
-                    <label for="password" class="block text-sm font-medium text-[var(--foreground)]">Password</label>
-                    <input type="password" id="password" name="password" required class="input-modern bg-[var(--card)]">
+                <div class="space-y-1.5">
+                    <label for="password"
+                        class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••"
+                        class="glass-input text-sm">
                 </div>
 
-                <div class="flex items-center justify-between mt-4">
-                    <div class="flex items-center">
+                <div class="flex items-center justify-between text-xs pt-1">
+                    <label class="flex items-center gap-2 text-slate-400 cursor-pointer">
                         <input id="remember_me" name="remember_me" type="checkbox"
-                            class="h-4 w-4 text-[var(--accent)] focus:ring-[var(--accent)] border-[var(--border)] rounded bg-transparent">
-                        <label for="remember_me" class="ml-2 block text-sm text-[var(--foreground)]">Remember me</label>
-                    </div>
-                    <div class="text-sm">
-                        <a href="#"
-                            class="font-medium text-[var(--accent)] hover:text-[var(--accent-secondary)] transition-colors">Forgot
-                            password?</a>
-                    </div>
+                            class="w-4 h-4 rounded bg-slate-900 border-white/20 text-cyan-400 focus:ring-cyan-500 focus:ring-offset-slate-950">
+                        <span>Remember session</span>
+                    </label>
+                    <a href="#" class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors">Forgot
+                        password?</a>
                 </div>
 
-                <button type="submit" class="w-full btn-primary mt-8">
-                    Sign In
+                <button type="submit"
+                    class="w-full py-3.5 px-6 rounded-xl font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 shadow-[0_0_25px_rgba(0,229,255,0.35)] transition-all duration-300 mt-6 flex items-center justify-center gap-2">
+                    <span>Sign In</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
                 </button>
             </form>
 
-            <p class="mt-8 text-center text-sm text-[var(--muted-foreground)]">
+            <p class="mt-8 text-center text-xs text-slate-400">
                 Don't have an account?
                 <a href="{{ url_for('auth.register') }}"
-                    class="font-medium text-[var(--accent)] hover:text-[var(--accent-secondary)] transition-colors">Create
-                    one</a>
+                    class="font-semibold text-cyan-400 hover:text-cyan-300 transition-colors">Create account</a>
             </p>
         </div>
     </div>
 </div>
+
+<!-- Three.js Library & 3D Interactive Cyber Wave Shader Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    (function () {
+        const canvas = document.getElementById('three-login-bg');
+        if (!canvas || typeof THREE === 'undefined') return;
+
+        let scene, camera, renderer, particles;
+        let count = 0;
+        let mouseX = 0, mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        const AMOUNTX = 85;
+        const AMOUNTY = 55;
+        const SEPARATION = 45;
+
+        function init() {
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.z = 900;
+            camera.position.y = 300;
+
+            scene = new THREE.Scene();
+
+            const numParticles = AMOUNTX * AMOUNTY;
+            const positions = new Float32Array(numParticles * 3);
+            const scales = new Float32Array(numParticles);
+
+            let i = 0, j = 0;
+            for (let ix = 0; ix < AMOUNTX; ix++) {
+                for (let iy = 0; iy < AMOUNTY; iy++) {
+                    positions[i] = ix * SEPARATION - ((AMOUNTX * SEPARATION) / 2); // x
+                    positions[i + 1] = 0; // y
+                    positions[i + 2] = iy * SEPARATION - ((AMOUNTY * SEPARATION) / 2); // z
+                    scales[j] = 1;
+                    i += 3;
+                    j++;
+                }
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1));
+
+            // Create glowing circular particle canvas texture
+            const textureCanvas = document.createElement('canvas');
+            textureCanvas.width = 16;
+            textureCanvas.height = 16;
+            const ctx = textureCanvas.getContext('2d');
+            const grad = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            grad.addColorStop(0, 'rgba(0, 229, 255, 1)');
+            grad.addColorStop(0.4, 'rgba(16, 185, 129, 0.8)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 16, 16);
+
+            const particleTexture = new THREE.CanvasTexture(textureCanvas);
+
+            const material = new THREE.PointsMaterial({
+                size: 14,
+                map: particleTexture,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            document.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('resize', onWindowResize);
+
+            animate();
+        }
+
+        function onPointerMove(event) {
+            mouseX = event.clientX - windowHalfX;
+            mouseY = event.clientY - windowHalfY;
+        }
+
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+            camera.position.x += (mouseX * 0.35 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 0.35 + 300 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            const positions = particles.geometry.attributes.position.array;
+            let i = 0;
+
+            for (let ix = 0; ix < AMOUNTX; ix++) {
+                for (let iy = 0; iy < AMOUNTY; iy++) {
+                    positions[i + 1] = (Math.sin((ix + count) * 0.3) * 55) + (Math.sin((iy + count) * 0.5) * 55);
+                    i += 3;
+                }
+            }
+
+            particles.geometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+
+            count += 0.04;
+        }
+
+        init();
+    })();
+</script>
+
+<style>
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg) scale(1);
+    }
+    50% {
+        transform: translateY(-12px) rotate(2deg) scale(1.03);
+    }
+}
+
+@keyframes auraGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.4)) drop-shadow(0 0 30px rgba(0, 229, 255, 0.2));
+    }
+    50% {
+        filter: drop-shadow(0 0 35px rgba(0, 229, 255, 0.85)) drop-shadow(0 0 55px rgba(16, 185, 129, 0.6));
+    }
+}
+
+@keyframes ringRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.animate-logo-float {
+    animation: logoFloat 4s ease-in-out infinite;
+}
+
+.animate-aura-glow {
+    animation: auraGlow 3s ease-in-out infinite;
+}
+
+.animate-ring-spin {
+    animation: ringRotate 10s linear infinite;
+}
+</style>
 {% endblock %}

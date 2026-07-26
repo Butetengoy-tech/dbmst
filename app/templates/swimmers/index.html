@@ -2,102 +2,208 @@
 
 {% block content %}
 <div class="space-y-8 animate-fade-in-up">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <!-- Header & Action Bar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-            <div class="section-badge mb-4">
-                <span class="section-badge-dot"></span>
-                <span class="section-badge-text">Athletes</span>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 tracking-wider uppercase">Roster Directory</span>
             </div>
-            <h1 class="text-4xl font-serif text-[var(--foreground)] tracking-tight">Swimmers</h1>
+            <h1 class="text-3xl md:text-4xl font-serif font-bold text-white tracking-tight">Swimmers Roster</h1>
+            <p class="mt-1 text-slate-400 text-sm">Manage team athletes, profiles, race logs, and performance metrics.</p>
         </div>
-        <div class="flex flex-col md:flex-row gap-4 md:items-center w-full md:w-auto">
-            <div class="relative w-full md:w-64">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex flex-col sm:flex-row gap-3 sm:items-center w-full md:w-auto">
+            <div class="relative w-full sm:w-72">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <input type="text" id="searchInput" class="input-modern w-full pl-10" placeholder="Search swimmers...">
+                <input type="text" id="searchInput" class="glass-input text-xs pl-10" placeholder="Search swimmer name...">
             </div>
             {% if session.get('role') in ('HeadCoach', 'System Administrator') %}
-            <a href="{{ url_for('swimmers.add') }}" class="btn-primary w-full md:w-auto text-center whitespace-nowrap">
-                Add Swimmer
+            <a href="{{ url_for('swimmers.add') }}" class="px-5 py-3 rounded-xl font-semibold text-xs text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all duration-300 flex items-center justify-center gap-2 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Add Swimmer</span>
             </a>
             {% endif %}
         </div>
     </div>
 
-    <div class="modern-card overflow-hidden">
+    <!-- Swimmers Glass Table -->
+    <div class="glass-card overflow-hidden border border-white/10">
         <div class="overflow-x-auto custom-scrollbar">
-            <table class="min-w-full divide-y divide-[var(--border)]">
-                <thead class="bg-[var(--muted)]/50">
+            <table class="table-glass">
+                <thead>
                     <tr>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Name</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Gender</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Birthday</th>
-                        <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Actions</th>
+                        <th scope="col">Athlete Name</th>
+                        <th scope="col">Gender</th>
+                        <th scope="col">Birthday</th>
+                        <th scope="col" class="text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="swimmersTable" class="divide-y divide-[var(--border)] bg-[var(--card)]">
+                <tbody id="swimmersTable">
                     {% for swimmer in swimmers %}
-                    <tr class="hover:bg-[#252525] transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)]">{{ swimmer.full_name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ swimmer.gender }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ swimmer.birthday }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ url_for('swimmers.view', id=swimmer.id) }}" class="text-[var(--accent)] hover:brightness-110 transition-all mr-3">View</a>
-                            {% if session.get('role') in ('HeadCoach', 'System Administrator') %}
-                            <a href="{{ url_for('swimmers.edit', id=swimmer.id) }}" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">Edit</a>
-                            {% endif %}
+                    <tr>
+                        <td class="whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                {% if swimmer.profile_image_url %}
+                                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-cyan-500/40 overflow-hidden shadow-[0_0_12px_rgba(0,229,255,0.25)] shrink-0">
+                                    <img src="{{ swimmer.profile_image_url }}" alt="{{ swimmer.full_name }}" class="w-full h-full object-cover">
+                                </div>
+                                {% else %}
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-500 border border-cyan-300/30 flex items-center justify-center text-white font-bold text-xs shadow-md shrink-0">
+                                    {{ swimmer.full_name[:1] | upper }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <p class="font-semibold text-sm text-white">{{ swimmer.full_name }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap text-xs text-slate-300">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-medium {% if swimmer.gender == 'Male' %}bg-blue-500/10 text-blue-400 border border-blue-500/20{% else %}bg-purple-500/10 text-purple-400 border border-purple-500/20{% endif %}">
+                                {{ swimmer.gender }}
+                            </span>
+                        </td>
+                        <td class="whitespace-nowrap text-xs font-mono text-slate-400">{{ swimmer.birthday }}</td>
+                        <td class="whitespace-nowrap text-right text-xs">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ url_for('swimmers.view', id=swimmer.id) }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all">
+                                    View
+                                </a>
+                                {% if session.get('role') in ('HeadCoach', 'System Administrator') %}
+                                <a href="{{ url_for('swimmers.edit', id=swimmer.id) }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+                                    Edit
+                                </a>
+                                <button type="button" 
+                                        onclick="openDeleteModal('{{ swimmer.id }}', '{{ swimmer.full_name | escape }}')" 
+                                        class="px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-all">
+                                    Delete
+                                </button>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="px-6 py-8 text-center text-sm text-[var(--muted-foreground)]">No swimmers found.</td>
+                        <td colspan="4" class="px-6 py-12 text-center text-xs text-slate-500">No registered swimmers found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+</div>
 
-    <script>
-    function initSwimmersSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const tableBody = document.getElementById('swimmersTable');
-        if (!searchInput || !tableBody) return;
+<!-- Swimmer Safety Delete Glass Modal -->
+<div id="swimmerDeleteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding: 20px;" class="backdrop-blur-md">
+    <div class="glass-card p-6 sm:p-8 max-w-md w-full relative border border-red-500/30 shadow-[0_25px_60px_rgba(239,68,68,0.2)] animate-fade-in-up">
+        <button onclick="closeDeleteModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl focus:outline-none">&times;</button>
+        
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-3xl mx-auto mb-4 shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+                ⚠️
+            </div>
+            <h2 class="text-2xl font-serif font-bold text-white">Delete Swimmer Profile</h2>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                You are about to permanently delete <strong id="deleteTargetName" class="text-red-400 font-semibold"></strong>. This will remove all associated race results, split logs, and personal best records.
+            </p>
+        </div>
 
-        const rows = tableBody.getElementsByTagName('tr');
+        <form id="deleteSwimmerForm" method="POST" action="" class="space-y-5">
+            <div class="space-y-2">
+                <label for="deleteConfirmationInput" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider text-center">
+                    Type <span class="text-red-400 font-mono font-bold">delete</span> to confirm
+                </label>
+                <input type="text" 
+                       id="deleteConfirmationInput" 
+                       placeholder='Type "delete" here...' 
+                       class="glass-input text-xs text-center font-mono"
+                       autocomplete="off"
+                       onkeyup="checkDeleteConfirmation()">
+            </div>
 
-        searchInput.addEventListener('input', function() {
-            const filter = searchInput.value.toLowerCase();
-            let visibleCount = 0;
-            
-            for (let i = 0; i < rows.length; i++) {
-                // Skip the "No swimmers found" row if it exists
-                if (rows[i].cells.length === 1) continue; 
-                
-                const nameCell = rows[i].cells[0];
-                if (nameCell) {
-                    const nameValue = nameCell.textContent || nameCell.innerText;
-                    if (nameValue.toLowerCase().indexOf(filter) > -1) {
-                        rows[i].style.display = "";
-                        visibleCount++;
-                    } else {
-                        rows[i].style.display = "none";
-                    }
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeDeleteModal()" class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        id="confirmDeleteBtn" 
+                        disabled 
+                        class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-white bg-red-600/40 border border-red-500/30 cursor-not-allowed opacity-50 transition-all duration-300">
+                    Confirm & Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let activeDeleteId = null;
+
+function openDeleteModal(swimmerId, swimmerName) {
+    activeDeleteId = swimmerId;
+    document.getElementById('deleteTargetName').textContent = swimmerName;
+    const form = document.getElementById('deleteSwimmerForm');
+    form.action = "/swimmers/" + swimmerId + "/delete";
+    
+    const input = document.getElementById('deleteConfirmationInput');
+    input.value = '';
+    
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.disabled = true;
+    btn.className = "flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-white bg-red-600/40 border border-red-500/30 cursor-not-allowed opacity-50 transition-all duration-300";
+    
+    const modal = document.getElementById('swimmerDeleteModal');
+    modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('swimmerDeleteModal');
+    modal.style.display = 'none';
+    activeDeleteId = null;
+}
+
+function checkDeleteConfirmation() {
+    const input = document.getElementById('deleteConfirmationInput');
+    const btn = document.getElementById('confirmDeleteBtn');
+    if (input.value.trim().toLowerCase() === 'delete') {
+        btn.disabled = false;
+        btn.className = "flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] cursor-pointer transition-all duration-300";
+    } else {
+        btn.disabled = true;
+        btn.className = "flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-white bg-red-600/40 border border-red-500/30 cursor-not-allowed opacity-50 transition-all duration-300";
+    }
+}
+
+function initSwimmersSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('swimmersTable');
+    if (!searchInput || !tableBody) return;
+
+    const rows = tableBody.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].cells.length === 1) continue; 
+            const nameCell = rows[i].cells[0];
+            if (nameCell) {
+                const nameValue = nameCell.textContent || nameCell.innerText;
+                if (nameValue.toLowerCase().indexOf(filter) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
                 }
             }
-        });
-    }
-    
-    // Execute immediately when HTMX loads the fragment
-    initSwimmersSearch();
-    
-    // Also attach to DOMContentLoaded for direct page loads
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSwimmersSearch);
-    }
-    </script>
-</div>
+        }
+    });
+}
+
+initSwimmersSearch();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSwimmersSearch);
+}
+</script>
 {% endblock %}
+

@@ -2,194 +2,207 @@
 
 {% block content %}
 <div class="space-y-8 animate-fade-in-up">
-    <!-- 1. Hero Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <!-- 1. Executive Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-            <div class="section-badge mb-4">
-                <span class="section-badge-dot"></span>
-                <span class="section-badge-text">Overview</span>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 tracking-wider uppercase">Executive Intelligence</span>
+                <span class="text-xs text-slate-500 font-mono">• Active Season {{ stats.active_season }}</span>
             </div>
-            <h1 class="text-4xl md:text-5xl font-serif text-[var(--foreground)] tracking-tight">
-                <span class="gradient-text">Dashboard</span>
+            <h1 class="text-3xl md:text-4xl font-serif font-bold text-white tracking-tight">
+                Performance <span class="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400">Overview</span>
             </h1>
-            <p class="mt-2 text-[var(--muted-foreground)] max-w-2xl">
-                Monitor swimmer progress, compare performances, and analyze competition results in one place.
+            <p class="mt-1 text-slate-400 text-sm max-w-2xl">
+                Real-time team analytics, swimmer time progressions, and competition metrics.
             </p>
         </div>
-        <div class="flex items-center space-x-4 bg-[var(--card)] px-4 py-2 rounded-xl border border-white/10 w-fit shadow-lg">
-            <span class="text-sm font-medium text-[var(--muted-foreground)]">Welcome, {{ session.get('role', 'User') }}</span>
+        <div class="flex items-center gap-3">
+            <div class="glass-card px-4 py-2.5 flex items-center gap-2.5 text-xs text-slate-300 border border-white/10">
+                <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+                <span class="font-medium">Role: <strong class="text-white">{{ session.get('role', 'User') }}</strong></span>
+            </div>
         </div>
     </div>
 
-    <!-- 2. Expand KPI Cards (6 cards) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Card 1 -->
-        <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10 hover:-translate-y-1 transition-all duration-300">
+    <!-- 2. KPI Cards Grid (6 cards) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Card 1: Total Swimmers -->
+        <div class="glass-card glass-card-hover p-5 relative overflow-hidden group">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Total Swimmers</h3>
-                    <p class="mt-2 text-3xl font-serif text-[var(--foreground)]">{{ stats.total_swimmers }}</p>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Swimmers</span>
+                    <p class="mt-2 text-3xl font-serif font-bold text-white tracking-tight">{{ stats.total_swimmers }}</p>
                 </div>
-                <div class="p-2 bg-[var(--muted)]/50 rounded-lg">
-                    <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,229,255,0.15)] group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-sm">
-                <span class="text-emerald-400 flex items-center font-medium"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg> +{{ stats.swimmers_trend }}</span>
-                <span class="text-[var(--muted-foreground)] ml-2">this month</span>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-emerald-400 font-semibold flex items-center bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"><svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg> +{{ stats.swimmers_trend }}</span>
+                <span class="text-slate-500 ml-2">added this month</span>
             </div>
         </div>
 
-        <!-- Card 2 -->
-        <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10 hover:-translate-y-1 transition-all duration-300">
+        <!-- Card 2: Competitions -->
+        <div class="glass-card glass-card-hover p-5 relative overflow-hidden group">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Competitions</h3>
-                    <p class="mt-2 text-3xl font-serif text-[var(--foreground)]">{{ stats.competitions }}</p>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Competitions</span>
+                    <p class="mt-2 text-3xl font-serif font-bold text-white tracking-tight">{{ stats.competitions }}</p>
                 </div>
-                <div class="p-2 bg-[var(--muted)]/50 rounded-lg">
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-sm">
-                <span class="text-[var(--muted-foreground)]">{{ stats.upcoming_meets|length }} upcoming</span>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-cyan-400 font-mono font-medium">{{ stats.upcoming_meets|length }} upcoming meets scheduled</span>
             </div>
         </div>
 
-        <!-- Card 3 -->
-        <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10 hover:-translate-y-1 transition-all duration-300">
+        <!-- Card 3: Recent Results -->
+        <div class="glass-card glass-card-hover p-5 relative overflow-hidden group">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Recent Results</h3>
-                    <p class="mt-2 text-3xl font-serif text-[var(--foreground)]">{{ stats.recent_results }}</p>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Recent Results</span>
+                    <p class="mt-2 text-3xl font-serif font-bold text-white tracking-tight">{{ stats.recent_results }}</p>
                 </div>
-                <div class="p-2 bg-[var(--muted)]/50 rounded-lg">
-                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-sm">
-                <span class="text-[var(--muted-foreground)]">Updated recently</span>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-slate-400 font-mono">Logged & verified</span>
             </div>
         </div>
 
-        <!-- Card 4 -->
-        <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10 hover:-translate-y-1 transition-all duration-300">
+        <!-- Card 4: Personal Records -->
+        <div class="glass-card glass-card-hover p-5 relative overflow-hidden group">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Personal Records</h3>
-                    <p class="mt-2 text-3xl font-serif text-[var(--foreground)]">{{ stats.personal_records }}</p>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Personal Records</span>
+                    <p class="mt-2 text-3xl font-serif font-bold text-white tracking-tight">{{ stats.personal_records }}</p>
                 </div>
-                <div class="p-2 bg-[var(--muted)]/50 rounded-lg">
-                    <svg class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)] group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-sm">
-                <span class="text-[var(--muted-foreground)]">All time</span>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-amber-400 font-mono font-medium">All-time team PBs</span>
             </div>
         </div>
 
-        <!-- Card 5 -->
-        <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10 hover:-translate-y-1 transition-all duration-300">
+        <!-- Card 5: Best Improvement -->
+        <div class="glass-card glass-card-hover p-5 relative overflow-hidden group">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Best Improvement</h3>
-                    <p class="mt-2 text-3xl font-serif text-[var(--foreground)]">-{{ stats.best_improvement }}s</p>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Best Time Drop</span>
+                    <p class="mt-2 text-3xl font-serif font-bold text-emerald-400 tracking-tight">-{{ stats.best_improvement }}s</p>
                 </div>
-                <div class="p-2 bg-[var(--muted)]/50 rounded-lg">
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-sm">
-                <span class="text-[var(--muted-foreground)]">Largest time drop</span>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-slate-400">Peak performance gain</span>
             </div>
         </div>
 
-        <!-- Card 6 -->
-        <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10 hover:-translate-y-1 transition-all duration-300">
+        <!-- Card 6: Active Season -->
+        <div class="glass-card glass-card-hover p-5 relative overflow-hidden group">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-sm font-medium text-[var(--muted-foreground)]">Active Season</h3>
-                    <p class="mt-2 text-3xl font-serif text-[var(--foreground)]">{{ stats.active_season }}</p>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Season</span>
+                    <p class="mt-2 text-3xl font-serif font-bold text-white tracking-tight">{{ stats.active_season }}</p>
                 </div>
-                <div class="p-2 bg-[var(--muted)]/50 rounded-lg">
-                    <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.15)] group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-sm">
-                <span class="text-[var(--muted-foreground)]">Current competition year</span>
+            <div class="mt-4 flex items-center text-xs">
+                <span class="text-purple-400 font-mono">Current competition cycle</span>
             </div>
         </div>
     </div>
 
     <!-- 3. Performance Trend Chart -->
-    <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10 w-full">
-        <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-            Performance Trend <span class="text-sm text-[var(--muted-foreground)] font-normal ml-2">(Monthly Average)</span>
-        </h3>
-        <div class="relative w-full h-[300px]">
+    <div class="glass-card p-6 border border-white/10 w-full relative">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                Performance Trend <span class="text-xs text-slate-400 font-normal">(Monthly Average Race Times)</span>
+            </h3>
+        </div>
+        <div class="relative w-full h-[320px]">
             <canvas id="trendChart"></canvas>
         </div>
     </div>
 
-    <!-- 2 Column Layout for additional metrics -->
+    <!-- 2 Column Analytics Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <!-- LEFT COLUMN -->
         <div class="space-y-6">
-            <!-- 6. Improvement Leaderboard -->
-            <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10">
-                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+            <!-- Improvement Leaderboard -->
+            <div class="glass-card p-6 border border-white/10">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                     Improvement Leaderboard
                 </h3>
-                <div class="space-y-3">
+                <div class="space-y-2.5">
                     {% for sw in stats.top_improvers %}
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-[var(--muted)]/30 hover:bg-[var(--muted)]/50 transition-colors">
+                    <div class="flex justify-between items-center p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-all">
                         <div class="flex items-center gap-3">
-                            <span class="text-emerald-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg></span>
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-mono text-xs font-bold">
+                                #{{ loop.index }}
+                            </div>
                             <div>
-                                <p class="font-medium text-[var(--foreground)]">{{ sw.name }}</p>
-                                {% if sw.event %}<p class="text-xs text-[var(--muted-foreground)]">Best in {{ sw.event }}</p>{% endif %}
+                                <p class="font-semibold text-sm text-white">{{ sw.name }}</p>
+                                {% if sw.event %}<p class="text-xs text-slate-400">{{ sw.event }}</p>{% endif %}
                             </div>
                         </div>
-                        <span class="text-emerald-400 font-mono text-sm">-{{ sw.improvement|round(2) }} sec</span>
+                        <span class="text-emerald-400 font-mono text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                            -{{ sw.improvement|round(2) }}s
+                        </span>
                     </div>
                     {% else %}
-                    <p class="text-sm text-[var(--muted-foreground)]">No improvement data available yet.</p>
+                    <p class="text-xs text-slate-500 py-4 text-center">No improvement data logged yet.</p>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- 7. Athletes Needing Attention -->
-            <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10">
-                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+            <!-- Athletes Needing Attention -->
+            <div class="glass-card p-6 border border-white/10">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     Needs Attention
                 </h3>
-                <div class="space-y-3">
+                <div class="space-y-2.5">
                     {% for sw in stats.needs_attention %}
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 transition-colors">
+                    <div class="flex justify-between items-center p-3.5 rounded-xl bg-red-500/5 border border-red-500/15 hover:bg-red-500/10 transition-all">
                         <div class="flex items-center gap-3">
                             <span class="text-red-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg></span>
                             <div>
-                                <p class="font-medium text-[var(--foreground)]">{{ sw.name }}</p>
-                                <p class="text-xs text-[var(--muted-foreground)]">{{ sw.desc }}{% if sw.event %} in {{ sw.event }}{% endif %}</p>
+                                <p class="font-semibold text-sm text-white">{{ sw.name }}</p>
+                                <p class="text-xs text-slate-400">{{ sw.desc }}{% if sw.event %} in {{ sw.event }}{% endif %}</p>
                             </div>
                         </div>
-                        <span class="text-red-400 font-mono text-sm">+{{ sw.regression|round(2) }} sec</span>
+                        <span class="text-red-400 font-mono text-xs font-semibold px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20">
+                            +{{ sw.regression|round(2) }}s
+                        </span>
                     </div>
                     {% else %}
-                    <p class="text-sm text-[var(--muted-foreground)]">All athletes are performing well!</p>
+                    <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                        <p class="text-xs text-emerald-400 font-medium">All athletes are performing well on target!</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- 8. Event Distribution -->
-            <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10">
-                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
-                    Event Distribution
+            <!-- Event Distribution -->
+            <div class="glass-card p-6 border border-white/10">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
+                    Event Breakdown
                 </h3>
                 <div class="relative w-full h-[250px]">
                     <canvas id="eventChart"></canvas>
@@ -197,51 +210,104 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
-        <div class="space-y-6">
-            <!-- 5. Recent Competition Results -->
-            <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10">
-                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Recent Results
-                </h3>
-                <div class="space-y-3">
-                    {% for comp in stats.recent_meet_results %}
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-[var(--muted)]/30">
-                        <div>
-                            <p class="font-medium text-[var(--foreground)]">{{ comp.name }}</p>
-                            <p class="text-xs text-[var(--muted-foreground)]">{{ comp.date }}</p>
+            <!-- Today's Birthday Celebration Banner (if any) -->
+            {% if stats.today_birthdays %}
+            {% for bday in stats.today_birthdays %}
+            <div class="p-5 rounded-2xl bg-gradient-to-r from-purple-900/60 via-pink-900/40 to-slate-900 border border-pink-500/40 shadow-[0_0_30px_rgba(236,72,153,0.3)] relative overflow-hidden flex items-center justify-between gap-4 animate-fade-in-up">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-950 border-2 border-pink-400 p-0.5 overflow-hidden shadow-[0_0_15px_rgba(236,72,153,0.5)] shrink-0">
+                        {% if bday.profile_image_url %}
+                        <img src="{{ bday.profile_image_url }}" alt="{{ bday.full_name }}" class="w-full h-full object-cover rounded-xl">
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg rounded-xl">
+                            {{ bday.full_name[:1] | upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30 uppercase tracking-wider">🎉 Happy Birthday!</span>
+                        </div>
+                        <h4 class="text-lg font-serif font-bold text-white tracking-tight mt-1">{{ bday.full_name }}</h4>
+                        <p class="text-xs text-pink-200">Turning <strong class="text-white">{{ bday.turning_age }} years old</strong> today! Wishing them fast times and a great season! 🎂</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Premium Full Interactive Calendar (Matches User Design) -->
+            <div class="glass-card p-6 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-pink-500/10 text-pink-300 border border-pink-500/20 uppercase tracking-wider">Team Calendar</span>
+                        </div>
+                        <h3 class="text-xl font-serif font-bold text-white mt-1 flex items-center gap-2">
+                            📅 Birthdays & Meet Schedule
+                        </h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/20 text-[11px] font-mono">
+                                <span class="w-2 h-2 rounded-full bg-pink-400"></span> Birthdays
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[11px] font-mono">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Swim Meets
+                            </span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Calendar View Area -->
+                <div id="fullCalendarContainer" class="min-h-[550px] w-full text-slate-200"></div>
+            </div>
+
+            <!-- Recent Competition Results -->
+            <div class="glass-card p-6 border border-white/10">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Recent Meet Logs
+                </h3>
+                <div class="space-y-2.5">
+                    {% for comp in stats.recent_meet_results %}
+                    <div class="flex justify-between items-center p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-all">
+                        <div>
+                            <p class="font-semibold text-sm text-white">{{ comp.name }}</p>
+                            <p class="text-xs text-slate-400 mt-0.5">{{ comp.date }}</p>
+                        </div>
+                        <span class="text-xs font-mono text-cyan-400 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20">Logged</span>
+                    </div>
                     {% else %}
-                    <p class="text-sm text-[var(--muted-foreground)]">No recent competitions.</p>
+                    <p class="text-xs text-slate-500 py-4 text-center">No recent competition logs available.</p>
                     {% endfor %}
                 </div>
             </div>
 
             <!-- Upcoming Competitions -->
-            <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10">
-                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+            <div class="glass-card p-6 border border-white/10">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Upcoming Competitions
+                    Upcoming Schedule
                 </h3>
-                <div class="space-y-3">
+                <div class="space-y-2.5">
                     {% for comp in stats.upcoming_meets %}
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-[var(--muted)]/30">
+                    <div class="flex justify-between items-center p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-all">
                         <div>
-                            <p class="font-medium text-[var(--foreground)]">{{ comp.name }}</p>
-                            <p class="text-xs text-[var(--muted-foreground)]">{{ comp.date }}</p>
+                            <p class="font-semibold text-sm text-white">{{ comp.name }}</p>
+                            <p class="text-xs text-slate-400 mt-0.5">{{ comp.date }}</p>
                         </div>
+                        <span class="text-xs font-mono text-amber-400 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">Upcoming</span>
                     </div>
                     {% else %}
-                    <p class="text-sm text-[var(--muted-foreground)]">No upcoming competitions.</p>
+                    <p class="text-xs text-slate-500 py-4 text-center">No upcoming meets scheduled.</p>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- 9. Stroke Analysis -->
-            <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10">
-                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+            <!-- Stroke Analysis -->
+            <div class="glass-card p-6 border border-white/10">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     Stroke Analysis
                 </h3>
@@ -250,24 +316,24 @@
                 </div>
             </div>
 
-            <!-- 10. PB Progress -->
-            <div class="modern-card p-6 rounded-2xl shadow-lg border border-white/10">
-                <h3 class="text-lg font-sans font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2">
+            <!-- Personal Best Progress timeline -->
+            <div class="glass-card p-6 border border-white/10">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    PB Progress
-                    {% if stats.pb_event %}<span class="text-xs text-[var(--muted-foreground)] ml-2 font-normal">({{ stats.pb_event }})</span>{% endif %}
+                    PB Timeline Progress
+                    {% if stats.pb_event %}<span class="text-xs text-slate-400 font-normal ml-2">({{ stats.pb_event }})</span>{% endif %}
                 </h3>
-                <div class="flex items-center justify-between bg-[var(--muted)]/30 p-4 rounded-xl overflow-x-auto gap-4 custom-scrollbar">
+                <div class="flex items-center justify-between bg-black/40 p-4 rounded-xl overflow-x-auto gap-4 custom-scrollbar border border-white/5">
                     {% for pb in stats.pb_progress %}
                     <div class="flex flex-col items-center flex-shrink-0">
-                        <span class="text-xs text-[var(--muted-foreground)]">{{ pb.month }}</span>
-                        <span class="font-mono font-medium text-[var(--foreground)]">{{ pb.time }}</span>
+                        <span class="text-[11px] text-slate-400 font-medium">{{ pb.month }}</span>
+                        <span class="font-mono text-xs font-bold text-emerald-400 mt-1">{{ pb.time }}</span>
                     </div>
                     {% if not loop.last %}
                     <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                     {% endif %}
                     {% else %}
-                    <p class="text-sm text-[var(--muted-foreground)] w-full text-center py-2">No personal best progression data available yet.</p>
+                    <p class="text-xs text-slate-500 w-full text-center py-2">No personal best progression data logged.</p>
                     {% endfor %}
                 </div>
             </div>
@@ -279,15 +345,14 @@
 {% block scripts %}
 <script>
     function initMainDashboardCharts() {
-        // Chart.js Default styling for dark mode
-        Chart.defaults.color = '#a3a3a3';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
         Chart.defaults.font.family = '"Inter", sans-serif';
 
         const chartData = {{ charts | safe }};
         
         // 1. Performance Trend Chart (Line)
-        if (chartData.trend_labels.length > 0) {
+        if (chartData.trend_labels && chartData.trend_labels.length > 0) {
             new Chart(document.getElementById('trendChart'), {
                 type: 'line',
                 data: {
@@ -295,16 +360,16 @@
                     datasets: [{
                         label: 'Avg Race Time (s)',
                         data: chartData.trend_data,
-                        borderColor: '#06b6d4', // cyan-500
-                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                        borderWidth: 2,
+                        borderColor: '#00E5FF',
+                        backgroundColor: 'rgba(0, 229, 255, 0.08)',
+                        borderWidth: 2.5,
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#06b6d4',
-                        pointBorderColor: '#1e1e1e',
+                        pointBackgroundColor: '#00E5FF',
+                        pointBorderColor: '#0F172A',
                         pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointRadius: 5,
+                        pointHoverRadius: 7
                     }]
                 },
                 options: {
@@ -313,32 +378,28 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            titleFont: { size: 13 },
-                            bodyFont: { size: 14, weight: 'bold' },
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleFont: { size: 12 },
+                            bodyFont: { size: 13, weight: 'bold' },
                             padding: 12,
-                            cornerRadius: 8,
-                            displayColors: false
+                            cornerRadius: 10,
+                            borderColor: 'rgba(0, 229, 255, 0.3)',
+                            borderWidth: 1
                         }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: { color: 'rgba(255,255,255,0.05)' }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
+                        y: { beginAtZero: false, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        x: { grid: { display: false } }
                     }
                 }
             });
         } else {
             const el = document.getElementById('trendChart');
-            if (el) el.outerHTML = '<div class="flex h-full items-center justify-center"><p class="text-sm text-[var(--muted-foreground)]">No performance trend data available yet.</p></div>';
+            if (el) el.outerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-slate-500">No performance trend data logged yet.</p></div>';
         }
 
         // 2. Stroke Analysis (Bar)
-        if (chartData.stroke_labels.length > 0) {
+        if (chartData.stroke_labels && chartData.stroke_labels.length > 0) {
             new Chart(document.getElementById('strokeChart'), {
                 type: 'bar',
                 data: {
@@ -346,8 +407,8 @@
                     datasets: [{
                         label: 'Total Races',
                         data: chartData.stroke_data,
-                        backgroundColor: '#10b981', // emerald-500
-                        borderRadius: 4
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderRadius: 6
                     }]
                 },
                 options: {
@@ -355,18 +416,18 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
                         x: { grid: { display: false } }
                     }
                 }
             });
         } else {
             const el = document.getElementById('strokeChart');
-            if (el) el.outerHTML = '<div class="flex h-full items-center justify-center"><p class="text-sm text-[var(--muted-foreground)]">No stroke analysis data available yet.</p></div>';
+            if (el) el.outerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-slate-500">No stroke analysis data logged yet.</p></div>';
         }
 
         // 3. Event Distribution (Pie or Doughnut)
-        if (chartData.event_labels.length > 0) {
+        if (chartData.event_labels && chartData.event_labels.length > 0) {
             new Chart(document.getElementById('eventChart'), {
                 type: 'doughnut',
                 data: {
@@ -374,33 +435,194 @@
                     datasets: [{
                         data: chartData.event_data,
                         backgroundColor: [
-                            '#06b6d4', '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'
+                            '#00E5FF', '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B'
                         ],
                         borderWidth: 0,
-                        hoverOffset: 4
+                        hoverOffset: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
+                    cutout: '72%',
                     plugins: {
-                        legend: { position: 'right' }
+                        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 } } }
                     }
                 }
             });
         } else {
             const el = document.getElementById('eventChart');
-            if (el) el.outerHTML = '<div class="flex h-full items-center justify-center"><p class="text-sm text-[var(--muted-foreground)]">No event distribution data available yet.</p></div>';
+            if (el) el.outerHTML = '<div class="flex h-full items-center justify-center"><p class="text-xs text-slate-500">No event distribution data logged yet.</p></div>';
         }
     }
     
-    // Execute immediately when HTMX loads the fragment
     initMainDashboardCharts();
-    
-    // Also attach to DOMContentLoaded for direct page loads
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initMainDashboardCharts);
     }
+</script>
+
+<!-- FullCalendar v6 CDN & Glass Styling Overrides -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<style>
+/* FullCalendar Premium Dark Glass Custom Styling (Matches User Screenshot) */
+.fc {
+    --fc-border-color: rgba(255, 255, 255, 0.08);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(255, 255, 255, 0.02);
+    --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.05);
+    font-family: inherit;
+}
+
+/* Header Toolbar & Buttons */
+.fc .fc-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px !important;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.35rem !important;
+    font-family: serif;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    letter-spacing: -0.025em;
+}
+
+.fc .fc-button-primary {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #cbd5e1 !important;
+    border-radius: 12px !important;
+    padding: 6px 14px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    text-transform: capitalize;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.fc .fc-button-primary:focus, .fc .fc-button-primary:active, .fc .fc-button-primary.fc-button-active {
+    background-color: #10B981 !important; /* Matches green active pill in screenshot */
+    border-color: #10B981 !important;
+    color: #022c22 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Column Day Headers (SUN, MON, TUE...) */
+.fc .fc-col-header-cell {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    padding: 12px 0 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+    font-size: 0.7rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em;
+    color: #94a3b8 !important;
+    text-transform: uppercase;
+}
+
+/* Date Grid Cells */
+.fc .fc-daygrid-day {
+    background-color: rgba(15, 23, 42, 0.3) !important;
+    transition: background-color 0.2s ease;
+}
+
+.fc .fc-daygrid-day:hover {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.fc .fc-daygrid-day-number {
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    color: #cbd5e1 !important;
+    padding: 8px 10px !important;
+}
+
+.fc .fc-day-today {
+    background-color: rgba(0, 229, 255, 0.06) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    color: #00E5FF !important;
+    font-weight: 900 !important;
+}
+
+/* Event Pill Cards */
+.fc-event {
+    border-radius: 8px !important;
+    padding: 3px 6px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    margin-top: 3px !important;
+    border-width: 1px !important;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.15s ease;
+}
+
+.fc-event:hover {
+    transform: translateY(-1px) scale(1.02);
+}
+</style>
+
+<script>
+function initFullCalendarEngine() {
+    const calendarEl = document.getElementById('fullCalendarContainer');
+    if (!calendarEl) return;
+
+    let calendarEvents = [];
+    try {
+        calendarEvents = JSON.parse('{{ stats.calendar_events_json | safe }}');
+    } catch(e) {
+        console.error("Calendar events parsing error:", e);
+    }
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listMonth'
+        },
+        buttonText: {
+            today: 'Today',
+            dayGridMonth: 'Month',
+            timeGridWeek: 'Week',
+            listMonth: 'List'
+        },
+        height: 'auto',
+        events: calendarEvents,
+        eventClick: function(info) {
+            const props = info.event.extendedProps;
+            if (props.type === 'birthday') {
+                alert(`🎉 Birthday Celebration!\n\nAthlete: ${props.athlete_name}\nTurning: ${props.turning_age} years old! 🎂`);
+            } else if (props.type === 'competition') {
+                alert(`🏊 Swim Competition!\n\nEvent: ${props.comp_name}\nVenue: ${props.venue}`);
+            }
+        }
+    });
+
+    calendar.render();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFullCalendarEngine);
+} else {
+    initFullCalendarEngine();
+}
 </script>
 {% endblock %}

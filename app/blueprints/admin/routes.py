@@ -48,3 +48,55 @@ def staff():
         return redirect(url_for('admin.staff'))
         
     return render_template('admin/staff.html')
+
+@admin_bp.route('/users', methods=['GET'])
+@login_required
+@role_required('HeadCoach', 'AsstCoach', 'System Administrator')
+def users():
+    users_list = []
+    if supabase:
+        try:
+            # Get registered profiles & swimmers
+            profiles_res = supabase.table('user_profiles').select('*').execute()
+            users_list = profiles_res.data if profiles_res.data else []
+        except Exception as e:
+            flash(f"Error fetching users: {str(e)}", "error")
+    else:
+        # Fallback demo list
+        users_list = [
+            {"id": "u1", "full_name": "Alex Smith", "email": "alex@swimmer.com", "role": "Swimmer", "status": "Active"},
+            {"id": "u2", "full_name": "Mary Smith", "email": "mary@parent.com", "role": "Parent", "status": "Active"},
+            {"id": "u3", "full_name": "John Doe", "email": "john@outsider.com", "role": "Swimmer", "status": "Restricted"}
+        ]
+    return render_template('admin/users.html', users=users_list)
+
+@admin_bp.route('/users/<string:id>/restrict', methods=['POST'])
+@login_required
+@role_required('HeadCoach', 'AsstCoach', 'System Administrator')
+def restrict_user(id):
+    new_status = request.form.get('status', 'Restricted')
+    if supabase:
+        try:
+            supabase.table('user_profiles').update({"status": new_status}).eq('id', id).execute()
+            flash(f"User access updated to '{new_status}'.", "success")
+        except Exception as e:
+            flash(f"Error updating user status: {str(e)}", "error")
+    else:
+        flash(f"Demo mode: Updated user status to '{new_status}'.", "success")
+    return redirect(url_for('admin.users'))
+
+@admin_bp.route('/users/<string:id>/delete', methods=['POST'])
+@login_required
+@role_required('HeadCoach', 'System Administrator')
+def delete_user(id):
+    if supabase:
+        try:
+            supabase.table('user_profiles').delete().eq('id', id).execute()
+            supabase.table('swimmers').delete().eq('user_id', id).execute()
+            flash("User account deleted successfully.", "success")
+        except Exception as e:
+            flash(f"Error deleting user: {str(e)}", "error")
+    else:
+        flash("Demo mode: User deleted.", "success")
+    return redirect(url_for('admin.users'))
+

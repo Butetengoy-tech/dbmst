@@ -21,6 +21,10 @@ def time_to_seconds(time_str):
 @dashboard_bp.route('/')
 @login_required
 def index():
+    # If swimmer is unmatched with official DBMST roster, show restricted access screen
+    if session.get('role') == 'Swimmer' and session.get('swimmer_unmatched'):
+        return render_template('dashboard/unmatched.html')
+
     stats = {
         "total_swimmers": 0,
         "swimmers_trend": 0,
@@ -46,22 +50,109 @@ def index():
     }
 
     if not supabase:
+        # Fallback demo birthdays
+        stats["birthday_calendar"] = [
+            {"full_name": "Michael Phelps", "birthday": "1985-06-30", "month_name": "June", "day": 30, "turning_age": 41, "is_today": False, "days_until": 15},
+            {"full_name": "Katie Ledecky", "birthday": "1997-03-17", "month_name": "March", "day": 17, "turning_age": 29, "is_today": False, "days_until": 45}
+        ]
+        stats["today_birthdays"] = []
         return render_template('dashboard/index.html', stats=stats, charts=json.dumps(charts))
 
     try:
-        # 1. Get Swimmers
-        swimmers_res = supabase.table('swimmers').select('id, full_name, created_at').execute()
+        # 1. Get Swimmers & Birthday Calendar Processing
+        swimmers_res = supabase.table('swimmers').select('*').execute()
         swimmers = swimmers_res.data if swimmers_res.data else []
         stats["total_swimmers"] = len(swimmers)
+
+        birthday_calendar = []
+        today_date = datetime.now()
+        current_m = today_date.month
+        current_d = today_date.day
+        
+        for s in swimmers:
+            b_str = s.get('birthday')
+            if not b_str: continue
+            try:
+                b_date = datetime.strptime(str(b_str)[:10], '%Y-%m-%d')
+                turning_age = today_date.year - b_date.year
+                is_today = (b_date.month == current_m and b_date.day == current_d)
+                
+                this_yr_bday = datetime(today_date.year, b_date.month, b_date.day)
+                if this_yr_bday < datetime(today_date.year, today_date.month, today_date.day):
+                    next_bday = datetime(today_date.year + 1, b_date.month, b_date.day)
+                else:
+                    next_bday = this_yr_bday
+                    
+                days_until = (next_bday - datetime(today_date.year, today_date.month, today_date.day)).days
+                
+                birthday_calendar.append({
+                    "id": s.get('id'),
+                    "full_name": s.get('full_name'),
+                    "profile_image_url": s.get('profile_image_url'),
+                    "birthday": b_str,
+                    "month_name": b_date.strftime('%B'),
+                    "day": b_date.day,
+                    "turning_age": turning_age,
+                    "is_today": is_today,
+                    "days_until": days_until
+                })
+            except:
+                pass
+                
+        birthday_calendar = sorted(birthday_calendar, key=lambda x: x['days_until'])
+        stats["birthday_calendar"] = birthday_calendar
+        stats["today_birthdays"] = [b for b in birthday_calendar if b['is_today']]
         
         current_month = datetime.now().strftime('%Y-%m')
         new_this_month = sum(1 for s in swimmers if str(s.get('created_at', '')).startswith(current_month))
         stats["swimmers_trend"] = new_this_month if new_this_month > 0 else 4 # fallback
 
         # 2. Get Competitions
-        comps_res = supabase.table('competitions').select('id, name, date').order('date', desc=True).execute()
+        comps_res = supabase.table('competitions').select('id, name, date, venue').order('date', desc=True).execute()
         comps = comps_res.data if comps_res.data else []
         stats["competitions"] = len(comps)
+
+        # 3. Build FullCalendar Events Dataset
+        calendar_events = []
+        for s in swimmers:
+            b_str = s.get('birthday')
+            if not b_str: continue
+            try:
+                b_date = datetime.strptime(str(b_str)[:10], '%Y-%m-%d')
+                turning_age = today_date.year - b_date.year
+                for yr in [today_date.year - 1, today_date.year, today_date.year + 1]:
+                    event_date = f"{yr:04d}-{b_date.month:02d}-{b_date.day:02d}"
+                    calendar_events.append({
+                        "id": f"bday-{s.get('id')}-{yr}",
+                        "title": f"🎂 {s.get('full_name')} ({turning_age}th)",
+                        "start": event_date,
+                        "type": "birthday",
+                        "athlete_name": s.get('full_name'),
+                        "profile_image_url": s.get('profile_image_url', ''),
+                        "turning_age": turning_age,
+                        "backgroundColor": "rgba(236, 72, 153, 0.25)",
+                        "borderColor": "rgba(236, 72, 153, 0.6)",
+                        "textColor": "#F472B6"
+                    })
+            except:
+                pass
+
+        for c in comps:
+            c_date = c.get('date')
+            if not c_date: continue
+            calendar_events.append({
+                "id": f"comp-{c.get('id')}",
+                "title": f"🏊 {c.get('name')}",
+                "start": str(c_date)[:10],
+                "type": "competition",
+                "comp_name": c.get('name'),
+                "venue": c.get('venue', 'N/A'),
+                "backgroundColor": "rgba(6, 182, 212, 0.25)",
+                "borderColor": "rgba(6, 182, 212, 0.6)",
+                "textColor": "#22D3EE"
+            })
+
+        stats["calendar_events_json"] = json.dumps(calendar_events)
         
         today = datetime.now().strftime('%Y-%m-%d')
         upcoming = [c for c in comps if (c.get('date') or '') >= today]

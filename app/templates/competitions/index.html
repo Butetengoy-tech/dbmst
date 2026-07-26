@@ -2,54 +2,71 @@
 
 {% block content %}
 <div class="space-y-8 animate-fade-in-up">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Header & Actions -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6">
         <div>
-            <div class="section-badge mb-4">
-                <span class="section-badge-dot"></span>
-                <span class="section-badge-text">Events</span>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 tracking-wider uppercase">Event Logs</span>
             </div>
-            <h1 class="text-4xl font-serif text-[var(--foreground)] tracking-tight">Competitions & Results</h1>
+            <h1 class="text-3xl md:text-4xl font-serif font-bold text-white tracking-tight">Competitions & Results</h1>
+            <p class="mt-1 text-slate-400 text-sm">Track swim meets, record race times, and bulk import official results.</p>
         </div>
         {% if session.get('role') in ['HeadCoach', 'AsstCoach', 'System Administrator'] %}
-        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-            <button onclick="document.getElementById('manual-entry-modal').style.display='flex'" class="btn-secondary w-full sm:w-auto text-center justify-center">
-                + Manual Entry
+        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2.5">
+            <button onclick="document.getElementById('manual-entry-modal').style.display='flex'" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Manual Entry</span>
             </button>
-            <button onclick="document.getElementById('upload-excel-modal').style.display='flex'" class="btn-success w-full sm:w-auto text-center justify-center">
-                📤 Bulk Upload
+            <button onclick="document.getElementById('upload-excel-modal').style.display='flex'" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-emerald-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span>Bulk Upload</span>
             </button>
-            <a href="{{ url_for('competitions.download_template') }}" hx-boost="false" download class="btn-secondary w-full sm:w-auto text-center justify-center">
-                📥 Template
+            <a href="{{ url_for('competitions.download_template') }}" hx-boost="false" download class="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Template</span>
             </a>
-            <a href="{{ url_for('competitions.add') }}" class="btn-primary w-full sm:w-auto text-center justify-center">
-                + Competition
+            <a href="{{ url_for('competitions.add') }}" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:brightness-110 shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>New Competition</span>
             </a>
         </div>
         {% endif %}
     </div>
 
-    <div class="modern-card overflow-hidden">
+    <!-- Competitions Table -->
+    <div class="glass-card overflow-hidden border border-white/10">
         <div class="overflow-x-auto custom-scrollbar">
-            <table class="min-w-full divide-y divide-[var(--border)]">
-                <thead class="bg-[var(--muted)]/50">
+            <table class="table-glass">
+                <thead>
                     <tr>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Name</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Venue</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Date</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wider">Pool Type</th>
+                        <th scope="col">Competition Name</th>
+                        <th scope="col">Venue</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Pool Type</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-[var(--border)] bg-[var(--card)]">
+                <tbody>
                     {% for comp in competitions %}
-                    <tr class="hover:bg-[#252525] transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)]">{{ comp.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ comp.venue }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ comp.date }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--muted-foreground)]">{{ comp.pool_type }}</td>
+                    <tr>
+                        <td class="whitespace-nowrap font-semibold text-sm text-white">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <span>{{ comp.name }}</span>
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap text-xs text-slate-300">{{ comp.venue }}</td>
+                        <td class="whitespace-nowrap text-xs font-mono text-slate-400">{{ comp.date }}</td>
+                        <td class="whitespace-nowrap text-xs">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                                {{ comp.pool_type }}
+                            </span>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="px-6 py-8 text-center text-sm text-[var(--muted-foreground)]">No competitions found.</td>
+                        <td colspan="4" class="px-6 py-12 text-center text-xs text-slate-500">No competitions found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -59,15 +76,15 @@
 </div>
 
 <!-- Upload Excel Modal -->
-<div id="upload-excel-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding: 20px;">
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
-        <span onclick="document.getElementById('upload-excel-modal').style.display='none'" class="absolute top-4 right-4 cursor-pointer text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-2xl">&times;</span>
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--muted)] text-3xl mb-4">
+<div id="upload-excel-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding: 20px;" class="backdrop-blur-md">
+    <div class="glass-card p-8 max-w-md w-full relative border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.9)] animate-fade-in-up">
+        <button onclick="document.getElementById('upload-excel-modal').style.display='none'" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl focus:outline-none">&times;</button>
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl mx-auto mb-3 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                 📤
             </div>
-            <h2 class="text-2xl font-serif mt-2 text-[var(--foreground)]">Upload Race Results</h2>
-            <p class="text-sm text-[var(--muted-foreground)] mt-2">Only .xls and .xlsx files are supported.</p>
+            <h2 class="text-2xl font-serif font-bold text-white">Upload Race Results</h2>
+            <p class="text-xs text-slate-400 mt-1">Import official Excel result spreadsheets (.xls, .xlsx)</p>
         </div>
         
         <form action="{{ url_for('competitions.upload_excel') }}" method="POST" enctype="multipart/form-data" onsubmit="
@@ -78,15 +95,15 @@
             document.getElementById('cancel-btn').disabled = true;
         ">
             <div class="mb-6">
-                <input type="file" name="file" accept=".xls,.xlsx" class="input-modern cursor-pointer p-2 flex items-center" required>
+                <input type="file" name="file" accept=".xls,.xlsx" class="glass-input cursor-pointer p-2 flex items-center text-xs" required>
             </div>
             
-            <div class="flex space-x-4 mt-8">
-                <button type="button" id="cancel-btn" onclick="document.getElementById('upload-excel-modal').style.display='none'" class="flex-1 btn-secondary disabled:opacity-50">Cancel</button>
-                <button type="submit" id="upload-btn" class="flex-1 btn-success relative flex items-center justify-center">
+            <div class="flex gap-3">
+                <button type="button" id="cancel-btn" onclick="document.getElementById('upload-excel-modal').style.display='none'" class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all">Cancel</button>
+                <button type="submit" id="upload-btn" class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center">
                     <span id="upload-btn-text">Upload & Import</span>
                     <span id="upload-spinner" class="hidden flex items-center justify-center">
-                        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-950" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -99,30 +116,31 @@
 </div>
 
 <!-- Manual Entry Modal -->
-<div id="manual-entry-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding: 20px;">
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
-        <span onclick="document.getElementById('manual-entry-modal').style.display='none'" class="absolute top-4 right-4 cursor-pointer text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-2xl">&times;</span>
+<div id="manual-entry-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding: 20px;" class="backdrop-blur-md">
+    <div class="glass-card p-8 max-w-lg w-full relative border border-white/15 shadow-[0_25px_60px_rgba(0,0,0,0.9)] animate-fade-in-up">
+        <button onclick="document.getElementById('manual-entry-modal').style.display='none'" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl focus:outline-none">&times;</button>
         <div class="mb-6">
-            <h2 class="text-2xl font-serif text-[var(--foreground)]">Add Manual Race Result</h2>
+            <h2 class="text-2xl font-serif font-bold text-white">Add Manual Race Result</h2>
+            <p class="text-xs text-slate-400 mt-1">Log an individual race time directly into the database.</p>
         </div>
         <form action="{{ url_for('competitions.manual_entry') }}" method="POST">
-            <div class="space-y-5">
+            <div class="space-y-4">
                 <div class="space-y-1.5">
-                    <label class="block text-sm font-medium text-[var(--foreground)]">Swimmer Name</label>
-                    <input type="text" name="swimmer_name" required class="input-modern">
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Swimmer Name</label>
+                    <input type="text" name="swimmer_name" required placeholder="e.g. Michael Phelps" class="glass-input text-xs">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block text-sm font-medium text-[var(--foreground)]">Competition Name</label>
-                    <input type="text" name="comp_name" required class="input-modern">
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Competition Name</label>
+                    <input type="text" name="comp_name" required placeholder="e.g. Regional Swim Meet 2026" class="glass-input text-xs">
                 </div>
-                <div class="grid grid-cols-2 gap-5">
+                <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-[var(--foreground)]">Distance (m)</label>
-                        <input type="number" name="distance" required class="input-modern">
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Distance (m)</label>
+                        <input type="number" name="distance" required placeholder="100" class="glass-input text-xs">
                     </div>
                     <div class="space-y-1.5">
-                        <label class="block text-sm font-medium text-[var(--foreground)]">Stroke</label>
-                        <select name="stroke" class="input-modern bg-[var(--card)]">
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Stroke</label>
+                        <select name="stroke" class="glass-input text-xs">
                             <option>Freestyle</option>
                             <option>Backstroke</option>
                             <option>Breaststroke</option>
@@ -132,17 +150,17 @@
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block text-sm font-medium text-[var(--foreground)]">Time (mm:ss.SS)</label>
-                    <input type="text" name="time" placeholder="01:25.50" required class="input-modern">
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Time (mm:ss.SS)</label>
+                    <input type="text" name="time" placeholder="01:25.50" required class="glass-input text-xs">
                 </div>
             </div>
             
-            <div class="flex space-x-4 mt-8">
-                <button type="button" onclick="document.getElementById('manual-entry-modal').style.display='none'" class="flex-1 btn-secondary">Cancel</button>
-                <button type="submit" class="flex-1 btn-primary">Save Result</button>
+            <div class="flex gap-3 mt-8">
+                <button type="button" onclick="document.getElementById('manual-entry-modal').style.display='none'" class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all">Cancel</button>
+                <button type="submit" class="flex-1 py-3 px-4 rounded-xl text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all">Save Result</button>
             </div>
         </form>
     </div>
 </div>
-
 {% endblock %}
+
